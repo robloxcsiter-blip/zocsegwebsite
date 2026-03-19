@@ -129,7 +129,7 @@
                 <div class="text-center z-10">
                     <div class="w-24 h-24 mx-auto bg-white text-black rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.2)]">3</div>
                     <h3 class="text-xl font-bold mb-2">Generate</h3>
-                    <p class="text-zinc-400 text-sm">Use our web dashboard or Discord bot to configure your details, and receive the email instantly.</p>
+                    <p class="text-zinc-400 text-sm">Use our Discord bot to configure your details, and receive the email instantly.</p>
                 </div>
             </div>
         </section>
@@ -150,7 +150,7 @@
                         <h3 class="text-4xl font-black mb-3 text-white">Hungarian</h3>
                         <p class="text-zinc-300 text-sm max-w-sm leading-relaxed">Domestic formats featuring top local streetwear & sneaker hubs. Perfectly formatted digital order confirmations.</p>
                         <div class="mt-8 flex items-center text-sm font-bold text-white uppercase tracking-wider bg-white/10 w-fit px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-black transition-colors">
-                            Explore Receipts <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                            View Templates <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
                         </div>
                     </div>
                 </div>
@@ -164,7 +164,7 @@
                         <h3 class="text-4xl font-black mb-3 text-white">International</h3>
                         <p class="text-zinc-300 text-sm max-w-sm leading-relaxed">Global brands and exact replicas of worldwide shipping emails. From luxury fashion houses to major verified marketplaces.</p>
                         <div class="mt-8 flex items-center text-sm font-bold text-white uppercase tracking-wider bg-white/10 w-fit px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-black transition-colors">
-                            Explore Receipts <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                            View Templates <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
                         </div>
                     </div>
                 </div>
@@ -203,7 +203,7 @@
                     </div>
                     <ul class="space-y-4 mb-8 text-sm text-zinc-300 flex-grow">
                         <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Access to ALL templates</li>
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Web Panel + Bot Generation</li>
+                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Bot Generation</li>
                         <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Receipt Access Role</li>
                     </ul>
                     <button onclick="buyPlan('receipt')" class="w-full py-3 bg-white text-black rounded-lg font-bold hover:bg-zinc-200 transition-colors">Purchase via Whop</button>
@@ -330,17 +330,14 @@
 
     <script>
         // --- KONFIGURÁCIÓ ---
-        // Amennyiben Ngrokot vagy Localtonetet használsz, írd át a címet a publikusra!
         const API_BASE_URL = "http://127.0.0.1:8080/api";
 
         // --- GLOBÁLIS ÁLLAPOTKEZELÉS ---
-        // Ezek a változók tárolják a felhasználói munkamenetet a böngésző memóriájában.
         let currentUser = null; 
         let userPlan = "None";
         let sessionToken = localStorage.getItem('sessionToken') || null;
 
         // --- ANIMÁCIÓS MOTOR ---
-        // Ez a függvény felelős az elemek görgetésre történő fokozatos megjelenítéséért.
         function reveal() {
             var reveals = document.querySelectorAll(".reveal");
             for (var i = 0; i < reveals.length; i++) {
@@ -352,11 +349,9 @@
             }
         }
         window.addEventListener("scroll", reveal);
-        reveal(); // Alapértelmezett hívás az induláshoz
+        reveal();
 
-        // --- SABLON ADATBÁZIS (EXPANDED) ---
-        // Ebben az objektumban tároljuk a weboldal összes elérhető számlatípusát.
-        // Bármilyen új sablont ide kell felvenni a listába.
+        // --- SABLON ADATBÁZIS ---
         const receiptData = {
             Hungarian: [
                 { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", image: "https://i.postimg.cc/wjn0znMB/balazskicks.png", file: "BalazsKICKS.html" },
@@ -383,23 +378,14 @@
             ]
         };
 
-        // --- PRIORITÁSI SORREND ---
         const sortOrder = { "Luxury": 1, "Premium": 2, "Tech": 3, "Verified": 4 };
-        
-        // --- MODAL REFERENCIÁK ---
         const receiptModal = document.getElementById('receiptModal');
         const generatorModal = document.getElementById('generatorModal');
         const settingsModal = document.getElementById('settingsModal');
         let currentCategoryData = [];
         let currentRegion = "";
-
-        // ================= BEÁLLÍTÁSOK LOGIKA (LOCALSTORAGE) =================
-        // Ebben a részben kezeljük a felhasználó profil adatait.
         let userSettings = JSON.parse(localStorage.getItem('receiptSettings')) || null;
 
-        /**
-         * Beállítások modal megnyitása és az adatok betöltése a memóriából.
-         */
         function openSettings() {
             if(userSettings) {
                 document.getElementById('set_email').value = userSettings.email || '';
@@ -415,9 +401,6 @@
             settingsModal.classList.add('active-modal');
         }
 
-        /**
-         * Beállítások modal bezárása és görgetés visszaállítása.
-         */
         function closeSettings() {
             settingsModal.classList.remove('active-modal');
             settingsModal.classList.add('hidden-modal');
@@ -426,9 +409,6 @@
             }
         }
 
-        /**
-         * Felhasználói adatok mentése a böngésző LocalStorage területére.
-         */
         function saveSettings() {
             userSettings = {
                 email: document.getElementById('set_email').value,
@@ -445,13 +425,9 @@
             setTimeout(() => { alertBox.classList.add('hidden'); closeSettings(); }, 1500);
         }
 
-        /**
-         * Véletlenszerű címgenerátor a gyors teszteléshez.
-         */
         function generateSettingsAddress(type) {
             const randomCard = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('set_card').value = randomCard;
-
             if(type === 'US') {
                 const firstNames = ["James", "John", "Robert", "Michael", "William", "David", "Jackson", "Ethan"];
                 const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Carter"];
@@ -477,35 +453,26 @@
             }
         }
 
-        // ================= SABLON VÁLASZTÓ MODAL =================
-        /**
-         * Kategória (Region) kiválasztása és a sablonok dinamikus kirajzolása.
-         */
         function openModal(category) {
             currentRegion = category;
-            document.getElementById('modalTitle').textContent = category + " Receipts";
+            document.getElementById('modalTitle').textContent = category + " Templates";
             const modalContent = document.getElementById('modalContent');
             modalContent.innerHTML = '';
-            
-            const sortedData = [...receiptData[category]].sort((a, b) => {
-                return (sortOrder[a.status] || 99) - (sortOrder[b.status] || 99);
-            });
+            const sortedData = [...receiptData[category]].sort((a, b) => (sortOrder[a.status] || 99) - (sortOrder[b.status] || 99));
             currentCategoryData = sortedData;
-            
             sortedData.forEach((item, index) => {
                 let statusColor = "bg-white/10 text-white";
                 if(item.status === "Luxury") statusColor = "bg-amber-500/20 text-amber-400";
                 if(item.status === "Premium") statusColor = "bg-purple-500/20 text-purple-400";
                 if(item.status === "Tech") statusColor = "bg-blue-500/20 text-blue-400";
                 if(item.status === "Verified") statusColor = "bg-green-500/20 text-green-400";
-
                 const card = `
                     <div onclick="openGenerator(${index})" class="store-card glass-card rounded-xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]" style="animation-delay: ${Math.random() * 0.2}s">
                         <div class="h-48 bg-zinc-900/50 flex items-center justify-center relative overflow-hidden">
                             <img src="${item.image}" alt="${item.name} Preview" class="absolute inset-0 w-full h-full object-contain p-4 opacity-90 group-hover:opacity-30 transition-opacity duration-300">
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-300 flex items-center justify-center backdrop-blur-[2px] opacity-0 group-hover:opacity-100">
                                 <span class="bg-white text-black px-8 py-3 rounded-full text-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                                    Generate
+                                    Access on Discord
                                 </span>
                             </div>
                         </div>
@@ -522,53 +489,35 @@
                 `;
                 modalContent.innerHTML += card;
             });
-
             document.body.style.overflow = 'hidden'; 
             receiptModal.classList.remove('hidden-modal');
             receiptModal.classList.add('active-modal');
         }
 
-        /**
-         * Általános modal bezáró függvény.
-         */
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active-modal');
             document.getElementById(modalId).classList.add('hidden-modal');
             if(modalId === 'receiptModal') document.body.style.overflow = 'auto'; 
         }
 
-        // ================= DISCORD AUTH ENGINE (PERSISTENCE) =================
-        /**
-         * Átirányítás a Discord OAuth2 bejelentkezési felületére.
-         */
         function discordLogin() {
             const clientId = "1482014502345117766";
-            const redirect = encodeURIComponent("http://127.0.0.1:5500/"); 
+            const redirect = encodeURIComponent(window.location.origin + "/"); 
             const discordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirect}&scope=identify+guilds`;
             window.location.href = discordOAuthUrl;
         }
 
-        /**
-         * OLDAL BETÖLTÉSEKOR: Új kód beváltása VAGY Meglévő session ellenőrzése.
-         */
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
-            
-            // HA VAN KÓD (ÚJ LOGIN)
             if (code) {
                 window.history.replaceState({}, document.title, "/");
                 await performLogin(code);
-            } 
-            // HA NINCS KÓD, DE VAN ELMENTETT TOKEN (AUTO-LOGIN)
-            else if (sessionToken) {
+            } else if (sessionToken) {
                 await checkExistingSession();
             }
         };
 
-        /**
-         * API Hívás: Belépési kód beváltása profil adatokra a Python botnál.
-         */
         async function performLogin(code) {
             try {
                 const response = await fetch(`${API_BASE_URL}/login`, {
@@ -576,22 +525,13 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code: code })
                 });
-                
                 if(response.ok) {
                     const data = await response.json();
                     saveUserData(data);
-                } else {
-                    alert("Discord Login Failed! Server returned an error.");
                 }
-            } catch (err) {
-                console.error("Login connect error:", err);
-                alert("Could not connect to the Backend API.");
-            }
+            } catch (err) { console.error(err); }
         }
 
-        /**
-         * API Hívás: Meglévő token érvényességének és rangjának frissítése.
-         */
         async function checkExistingSession() {
             try {
                 const response = await fetch(`${API_BASE_URL}/user_info`, {
@@ -599,23 +539,16 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: sessionToken })
                 });
-
                 if (response.ok) {
                     const data = await response.json();
                     saveUserData(data);
                 } else {
-                    // Ha a token lejárt, töröljük a memóriából
                     localStorage.removeItem('sessionToken');
                     sessionToken = null;
                 }
-            } catch (err) {
-                console.error("Session sync failed:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        /**
-         * Segédfunkció az adatok elmentéséhez és az UI frissítéséhez.
-         */
         function saveUserData(data) {
             currentUser = data.user;
             userPlan = data.plan;
@@ -624,17 +557,12 @@
             updateAuthUI();
         }
 
-        /**
-         * UI Frissítés: Bejelentkezés gomb lecserélése profil adatokra.
-         */
         function updateAuthUI() {
             const authArea = document.getElementById('userAuthArea');
             if (!currentUser) return; 
-
             let badgeColor = "text-zinc-300 bg-zinc-800";
             if(userPlan === 'Premium') badgeColor = "text-amber-400 bg-amber-500/20";
             if(userPlan === 'Receipt') badgeColor = "text-green-400 bg-green-500/20";
-
             authArea.innerHTML = `
                 <div class="flex items-center gap-3 animate-[fadeIn_0.5s_ease-out]">
                     <div class="flex flex-col items-end">
@@ -646,197 +574,14 @@
             `;
         }
 
-        // ================= DINAMIKUS GENERÁLÓ MOTOR =================
-        /**
-         * Generáló ablak megnyitása: Template beolvasása, változók kinyerése.
-         */
+        // ================= DISABLED GENERATION LOGIC =================
         async function openGenerator(itemIndex) {
-            // JOGOSULTSÁG ELLENŐRZÉS
-            if (!sessionToken || !currentUser) {
-                alert("LOCKED: You must Login with Discord first to verify your permissions.");
-                window.location.href = "#how-it-works"; 
-                return;
-            }
-            if (userPlan !== 'Receipt' && userPlan !== 'Premium') {
-                alert("ACCESS DENIED: You need a 'Receipt Access' or 'Premium Access' role. Please purchase a plan below.");
-                window.location.href = "#pricing"; 
-                return;
-            }
-
-            // PROFIL ELLENŐRZÉS
-            userSettings = JSON.parse(localStorage.getItem('receiptSettings'));
-            if(!userSettings || !userSettings.street || !userSettings.card) {
-                alert("PROFILE REQUIRED: Please configure your Settings (Email, Address) before generating.");
-                openSettings();
-                return;
-            }
-
-            receiptModal.classList.remove('active-modal');
-            receiptModal.classList.add('hidden-modal');
-
-            const item = currentCategoryData[itemIndex];
-            document.getElementById('generatorBrandName').textContent = item.name + " Loading...";
-            
-            const dynamicInputsDiv = document.getElementById('dynamicInputs');
-            const hiddenInputsBox = document.getElementById('hiddenInputsBox');
-            dynamicInputsDiv.innerHTML = '<div class="text-white col-span-2 text-center py-10">Searching for placeholders...</div>'; 
-            hiddenInputsBox.innerHTML = '';
-            
-            let foundVariables = [];
-            try {
-                // SABLON HTML FÁJL LETÖLTÉSE ELEMZÉSRE
-                const response = await fetch(`templates/${item.file}`);
-                if (!response.ok) throw new Error(`HTML File not found!`);
-                const htmlContent = await response.text();
-                
-                // REGEX: Megkeresi az összes {VALTOZO} formátumot a HTML kódban
-                const regex = /\{([a-zA-Z0-9_]+)\}/g; 
-                let match;
-                const varsSet = new Set();
-                while ((match = regex.exec(htmlContent)) !== null) {
-                    varsSet.add(match[1]);
-                }
-                foundVariables = [...varsSet];
-            } catch (err) {
-                alert("ERROR: Make sure the 'templates' folder exists and " + item.file + " is inside it!");
-                closeGenerator();
-                return;
-            }
-
-            document.getElementById('generatorBrandName').textContent = item.name;
-            let hasPrice = false;
-
-            // DÁTUMOK ELŐKÉSZÍTÉSE
-            const today = new Date();
-            const delivery = new Date();
-            delivery.setDate(today.getDate() + 4);
-
-            let formattedDate = currentRegion === 'Hungarian' 
-                ? today.toLocaleDateString('hu-HU').replace(/-/g, '. ') 
-                : today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                
-            let formattedDelDate = currentRegion === 'Hungarian' 
-                ? delivery.toLocaleDateString('hu-HU').replace(/-/g, '. ') 
-                : delivery.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-            const uniqueVars = foundVariables.filter(v => {
-                const l = v.toLowerCase();
-                return l !== 'order_number' && l !== 'total_price' && l !== 'email';
-            });
-
-            // AUTOMATIKUSAN KITÖLTÖTT MEZŐK LISTÁJA
-            const settingsVars = [
-                'customer_name', 'client_name', 'shipping_address', 'billing_address', 'delivery_address', 'address',
-                'city', 'zip', 'postal_code', 'country', 'street',
-                'date', 'delivery_date', 'estimated_delivery', 
-                'card_end', 'card_last_4', 'card', 'card_type', 'card_brand',
-                'subtotal', 'subtotal_price'
-            ];
-
-            dynamicInputsDiv.innerHTML = '';
-            uniqueVars.forEach(variable => {
-                const lowerVar = variable.toLowerCase();
-                const isPriceField = (lowerVar.includes('price') || lowerVar.includes('fee') || lowerVar.includes('cost') || lowerVar.includes('tax')) && !lowerVar.includes('subtotal');
-                if(isPriceField) hasPrice = true;
-                
-                const isSettingsVar = settingsVars.includes(lowerVar);
-
-                if (isSettingsVar) {
-                    let val = "";
-                    if(lowerVar.includes('name')) val = userSettings.name;
-                    else if(lowerVar === 'city') val = userSettings.city;
-                    else if(lowerVar === 'postal_code' || lowerVar === 'zip') val = userSettings.postal;
-                    else if(lowerVar === 'country') val = userSettings.country;
-                    else if(lowerVar === 'street') val = userSettings.street;
-                    else if(lowerVar.includes('address')) val = `${userSettings.street}, ${userSettings.city} ${userSettings.postal}, ${userSettings.country}`;
-                    else if(lowerVar === 'date') val = formattedDate;
-                    else if(lowerVar.includes('delivery')) val = formattedDelDate;
-                    else if(lowerVar === 'card' || lowerVar === 'card_type' || lowerVar === 'card_brand') val = "Visa";
-                    else if(lowerVar.includes('card')) val = userSettings.card;
-                    else if(lowerVar.includes('subtotal')) val = ""; 
-                    
-                    hiddenInputsBox.innerHTML += `<input type="hidden" id="hidden_${variable}" name="${variable}" value="${val}">`;
-                } else {
-                    const niceLabel = variable.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                    const extraClass = isPriceField ? 'calc-price-input' : '';
-                    const onInputAttr = isPriceField ? `oninput="formatAndCalculate(this)"` : '';
-
-                    const inputHtml = `
-                        <div class="animate-[fadeIn_0.4s_ease-out]">
-                            <label class="block text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wider">${niceLabel}</label>
-                            <input type="text" id="input_${variable}" name="${variable}" required ${onInputAttr}
-                                class="${extraClass} w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white/30 transition-colors placeholder-zinc-700" 
-                                placeholder="${isPriceField ? 'e.g. 15000' : 'Enter ' + niceLabel}">
-                        </div>
-                    `;
-                    dynamicInputsDiv.innerHTML += inputHtml;
-                }
-            });
-
-            const totalBox = document.getElementById('totalPriceBox');
-            if (hasPrice) {
-                totalBox.classList.remove('hidden');
-                document.getElementById('liveTotalDisplay').textContent = (currentRegion === 'Hungarian') ? "0 Ft" : "$0.00";
-            } else {
-                totalBox.classList.add('hidden');
-            }
-
-            generatorModal.classList.remove('hidden-modal');
-            generatorModal.classList.add('active-modal');
+            // Nem nyitjuk meg a generátort, hanem tájékoztatjuk a felhasználót és a fizetéshez küldjük
+            alert("This receipt template is available for generation via our Discord Bot after purchasing access.");
+            closeModal('receiptModal');
+            window.location.href = "#pricing";
         }
 
-        /**
-         * Formázó motor: Ezres elválasztó és számítások kezelése gépelés közben.
-         */
-        function formatAndCalculate(inputElement) {
-            let rawValue = inputElement.value.replace(/[^0-9]/g, '');
-            if (rawValue !== '') {
-                let number = parseInt(rawValue, 10);
-                if (currentRegion === 'Hungarian') {
-                    inputElement.value = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-                } else {
-                    inputElement.value = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                }
-            } else {
-                inputElement.value = '';
-            }
-
-            const lowerName = inputElement.name.toLowerCase();
-            if(lowerName === 'product_price' || lowerName === 'item_price') {
-                const hiddenInputs = document.querySelectorAll('#hiddenInputsBox input');
-                hiddenInputs.forEach(hInput => {
-                    if(hInput.name.toLowerCase().includes('subtotal')) {
-                        hInput.value = inputElement.value;
-                    }
-                });
-            }
-
-            calculateTotal();
-        }
-
-        /**
-         * Kalkulátor: Összegzi az összes ár mezőt a végeredményhez.
-         */
-        function calculateTotal() {
-            let total = 0;
-            const inputs = document.querySelectorAll('.calc-price-input');
-            inputs.forEach(input => {
-                const rawVal = input.value.replace(/[^0-9]/g, '');
-                if(rawVal !== '') { total += parseInt(rawVal, 10); }
-            });
-
-            let formattedTotal = "";
-            if (currentRegion === 'Hungarian') {
-                formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " Ft";
-            } else {
-                formattedTotal = "$" + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            }
-            document.getElementById('liveTotalDisplay').textContent = formattedTotal;
-        }
-
-        /**
-         * Generáló ablak bezárása és vissza az áruházakhoz.
-         */
         function closeGenerator() {
             generatorModal.classList.remove('active-modal');
             generatorModal.classList.add('hidden-modal');
@@ -844,79 +589,20 @@
             receiptModal.classList.add('active-modal');
         }
 
-        /**
-         * KÜLDÉS: Adatok összecsomagolása és elküldése a Python Bot API-nak.
-         */
         async function submitGeneration() {
-            const btn = document.getElementById('submitBtn');
-            btn.innerHTML = `<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sending...`;
-            btn.disabled = true;
-
-            const payload = {
-                token: sessionToken,
-                template: document.getElementById('generatorBrandName').textContent.replace(' Loading...', ''),
-                variables: {}
-            };
-
-            // Látható mezők begyűjtése
-            const inputs = document.querySelectorAll('#generatorForm input');
-            inputs.forEach(i => {
-                payload.variables[i.name] = i.value;
-            });
-
-            // Rejtett (automata) mezők begyűjtése
-            const hiddenInputs = document.querySelectorAll('#hiddenInputsBox input');
-            hiddenInputs.forEach(i => {
-                payload.variables[i.name] = i.value;
-            });
-            
-            // Kalkulált végeredmény hozzáadása
-            payload.variables['total_price'] = document.getElementById('liveTotalDisplay').textContent;
-            
-            // Profil email cím beszúrása a kiküldéshez
-            if(userSettings && userSettings.email) {
-                payload.variables['email'] = userSettings.email;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/generate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if(response.ok) {
-                    document.getElementById('sendStatus').classList.remove('hidden');
-                    setTimeout(() => { 
-                        document.getElementById('sendStatus').classList.add('hidden');
-                        closeGenerator(); 
-                    }, 2000);
-                } else {
-                    const errorText = await response.text();
-                    alert("Bot Error: " + errorText);
-                }
-            } catch (err) {
-                alert("Cannot reach Python Bot! Is the server running?");
-            }
-
-            btn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Generate & Send Email`;
-            btn.disabled = false;
+            // Funkció letiltva a weboldalon
+            alert("Generation is now handled exclusively via Discord Bot for better security.");
         }
 
-        /**
-         * WHOP INTEGRÁCIÓ: Átirányítás a fizetési felületre.
-         */
         function buyPlan(plan) {
             const whopLinks = {
-                'resell': 'https://whop.com/checkout/resell-access',
-                'receipt': 'https://whop.com/checkout/receipt-access',
-                'premium': 'https://whop.com/checkout/premium-access'
+                'resell': 'https://whop.com/receipter/resell-access',
+                'receipt': 'https://whop.com/receipter/receipt-access',
+                'premium': 'https://whop.com/receipter/premium-b0-6dc9'
             };
-            alert(`Redirecting to Secure Whop Checkout for the ${plan.toUpperCase()} plan...`);
-            // window.location.href = whopLinks[plan]; // Élesben ezt kell használni
+            window.location.href = whopLinks[plan];
         }
 
-        // --- STÍLUS INJEKTÁLÁS ---
         document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }</style>`);
     </script>
 </body>
