@@ -491,17 +491,44 @@
             }
         }
 
-        function openModal(category) {
+        // ================= SABLON VÁLASZTÓ =================
+        async function openModal(category) {
             currentRegion = category;
             document.getElementById('modalTitle').textContent = category + " Receipts";
             const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = '';
             
-            const sortedData = [...receiptData[category]].sort((a, b) => {
+            // Töltőképernyő amíg a Vercelen ellenőrzi a fájlokat
+            modalContent.innerHTML = '<div class="col-span-full py-10 text-center text-zinc-500 font-bold">Loading available templates...</div>';
+            
+            document.body.style.overflow = 'hidden'; 
+            receiptModal.classList.remove('hidden-modal');
+            receiptModal.classList.add('active-modal');
+            
+            // ÚJ: Kiszűrjük azokat a sablonokat, amik nincsenek benne az index.html melletti Vercel "templates" mappában
+            const validItems = [];
+            await Promise.all(receiptData[category].map(async (item) => {
+                try {
+                    // HEAD kérés: csak megnézzük, létezik-e a fájl az index.html melletti mappában
+                    const response = await fetch(`templates/${item.file}`, { method: 'HEAD' });
+                    if (response.ok) {
+                        validItems.push(item);
+                    }
+                } catch (err) {
+                    console.error("Template check failed:", err);
+                }
+            }));
+
+            const sortedData = validItems.sort((a, b) => {
                 return (sortOrder[a.status] || 99) - (sortOrder[b.status] || 99);
             });
             currentCategoryData = sortedData;
             
+            modalContent.innerHTML = '';
+            
+            if (sortedData.length === 0) {
+                modalContent.innerHTML = '<div class="col-span-full py-10 text-center text-zinc-500 font-bold">No available templates found in the Vercel templates folder.</div>';
+            }
+
             sortedData.forEach((item, index) => {
                 let statusColor = "bg-white/10 text-white";
                 if(item.status === "Luxury") statusColor = "bg-amber-500/20 text-amber-400";
@@ -531,10 +558,6 @@
                 `;
                 modalContent.innerHTML += card;
             });
-
-            document.body.style.overflow = 'hidden'; 
-            receiptModal.classList.remove('hidden-modal');
-            receiptModal.classList.add('active-modal');
         }
 
         function closeModal(modalId) {
@@ -545,7 +568,6 @@
 
         // ================= DISCORD LOGIN =================
         function discordLogin() {
-            // FIX: Perjel NÉLKÜLI pontos hivatkozás
             const discordOAuthUrl = "https://discord.com/oauth2/authorize?client_id=1482014502345117766&response_type=code&redirect_uri=https%3A%2F%2Freceipt-er.vercel.app&scope=identify+guilds"; 
             window.location.href = discordOAuthUrl;
         }
@@ -553,7 +575,7 @@
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
-            
+
             if (code) {
                 window.history.replaceState({}, document.title, "/");
                 try {
@@ -577,6 +599,28 @@
                     console.error(err);
                     showCustomAlert("Connection Error", "Could not connect to the Backend API. Make sure the Python bot is running on your server!", "Close", null, true);
                 }
+            } else if (sessionToken) {
+                // AUTO-LOGIN: Ha van már elmentett tokenünk, leellenőrizzük
+                try {
+                    const response = await fetch(`${API_BASE_URL}/user_info`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: sessionToken })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        currentUser = data.user; 
+                        userPlan = data.plan;    
+                        sessionToken = data.token; 
+                        localStorage.setItem('sessionToken', sessionToken);
+                        updateAuthUI();
+                    } else {
+                        localStorage.removeItem('sessionToken');
+                        sessionToken = null;
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
             }
         };
 
@@ -596,7 +640,9 @@
             `;
         }
 
+        // ================= DINAMIKUS GENERÁLÓ =================
         async function openGenerator(itemIndex) {
+            // VALÓDI ENGEDÉLY ELLENŐRZÉS PROFIBB ABLAKKAL
             if (!sessionToken || !currentUser) {
                 showCustomAlert("Access Locked", "You must Login with Discord first to verify your permissions.", "Login via Discord", discordLogin, true);
                 return;
@@ -628,6 +674,7 @@
             
             let foundVariables = [];
             try {
+                // ITT TÖLTI BE A FÁJLT A TEMPLATES MAPPÁBÓL
                 const response = await fetch(`templates/${item.file}`);
                 if (!response.ok) throw new Error(`HTML File not found!`);
                 const htmlContent = await response.text();
