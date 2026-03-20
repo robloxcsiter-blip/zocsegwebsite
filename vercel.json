@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/bot-api/:path*",
       "destination": "http://212.192.29.40:25777/api/:path*"
     }
   ]
