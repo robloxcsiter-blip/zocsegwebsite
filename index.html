@@ -342,12 +342,15 @@
     </div>
 
     <script>
+        // MOST MÁR A VERCEL-EN KERESZTÜL HÍVJA A SZERVEREDET
         const API_BASE_URL = "/api";
 
+        // GLOBÁLIS ADATOK
         let currentUser = null; 
         let userPlan = "None";
         let sessionToken = localStorage.getItem('sessionToken') || null;
 
+        // ÚJ: CUSTOM ALERT FUNKCIÓ
         function showCustomAlert(title, message, btnText = "OK", callback = null, isError = false) {
             const modal = document.getElementById('customAlertModal');
             document.getElementById('alertTitle').textContent = title;
@@ -391,12 +394,7 @@
         const receiptData = {
             Hungarian: [
                 { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", image: "https://i.postimg.cc/wjn0znMB/balazskicks.png", file: "BalazsKICKS.html" },
-                { name: "OnSize", status: "Verified", tag: "Sneaker", image: "https://i.postimg.cc/hGxMtMQc/onsize.png", file: "OnSize.html" },
-                { name: "Footshop HU", status: "Verified", tag: "Sneaker", image: "https://i.postimg.cc/85zK6qL4/footshop.png", file: "FootshopHU.html" },
-                { name: "Nike HU", status: "Verified", tag: "Sportswear", image: "https://i.postimg.cc/mD8R5Y6t/nike.png", file: "NikeHU.html" },
-                { name: "Adidas HU", status: "Verified", tag: "Sportswear", image: "https://i.postimg.cc/vH1mBvXy/adidas.png", file: "AdidasHU.html" },
-                { name: "Tiszacipo", status: "Verified", tag: "Local", image: "https://i.postimg.cc/q7S7t1zV/tisza.png", file: "Tisza.html" },
-                { name: "True To Sole", status: "Verified", tag: "Sneaker", image: "https://i.postimg.cc/4xpPzG7q/tts.png", file: "TrueToSole.html" }
+                { name: "OnSize", status: "Verified", tag: "Sneaker", image: "https://i.postimg.cc/hGxMtMQc/onsize.png", file: "OnSize.html" }
             ],
             International: [
                 { name: "Louis Vuitton", status: "Luxury", tag: "Fashion", image: "https://i.postimg.cc/Z5XVmXnR/louisvuitton.png", file: "Louis Vuitton.html" },
@@ -404,13 +402,7 @@
                 { name: "Apple", status: "Tech", tag: "Electronics", image: "https://i.postimg.cc/htNpnNvS/apple.png", file: "Apple.html" },
                 { name: "Dior", status: "Luxury", tag: "Fashion", image: "https://i.postimg.cc/Z5XVmXn5/dior.png", file: "DIOR.html" },
                 { name: "GOAT", status: "Verified", tag: "Marketplace", image: "https://i.postimg.cc/xdHg1gNS/goat.png", file: "GOAT.html" },
-                { name: "Moncler", status: "Luxury", tag: "Fashion", image: "https://i.postimg.cc/MGRtptfx/moncler.png", file: "MONCLER.html" },
-                { name: "Hermes", status: "Luxury", tag: "Fashion", image: "https://i.postimg.cc/m26q2Z0S/hermes.png", file: "Hermes.html" },
-                { name: "Gucci", status: "Luxury", tag: "Fashion", image: "https://i.postimg.cc/4xpPzG7q/gucci.png", file: "Gucci.html" },
-                { name: "Prada", status: "Luxury", tag: "Fashion", image: "https://i.postimg.cc/Y97pYhR0/prada.png", file: "Prada.html" },
-                { name: "Farfetch", status: "Luxury", tag: "Marketplace", image: "https://i.postimg.cc/k5hZ6v2c/farfetch.png", file: "Farfetch.html" },
-                { name: "SSENSE", status: "Luxury", tag: "Marketplace", image: "https://i.postimg.cc/Xv9n4P2g/ssense.png", file: "SSENSE.html" },
-                { name: "Grailed", status: "Verified", tag: "Marketplace", image: "https://i.postimg.cc/mD8R5Y6z/grailed.png", file: "Grailed.html" }
+                { name: "Moncler", status: "Luxury", tag: "Fashion", image: "https://i.postimg.cc/MGRtptfx/moncler.png", file: "MONCLER.html" }
             ]
         };
 
@@ -421,6 +413,7 @@
         let currentCategoryData = [];
         let currentRegion = "";
 
+        // ================= BEÁLLÍTÁSOK LOGIKA =================
         let userSettings = JSON.parse(localStorage.getItem('receiptSettings')) || null;
 
         function openSettings() {
@@ -491,6 +484,7 @@
             }
         }
 
+        // ================= SABLON VÁLASZTÓ =================
         function openModal(category) {
             currentRegion = category;
             document.getElementById('modalTitle').textContent = category + " Receipts";
@@ -545,8 +539,8 @@
 
         // ================= DISCORD LOGIN =================
         function discordLogin() {
-            // FIX: Perjel NÉLKÜLI pontos hivatkozás
-            const discordOAuthUrl = "https://discord.com/oauth2/authorize?client_id=1482014502345117766&response_type=code&redirect_uri=https%3A%2F%2Freceipt-er.vercel.app&scope=identify+guilds"; 
+            const redirectUri = encodeURIComponent("https://receipt-er.vercel.app/");
+            const discordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1482014502345117766&response_type=code&redirect_uri=${redirectUri}&scope=identify+guilds`; 
             window.location.href = discordOAuthUrl;
         }
 
@@ -596,7 +590,9 @@
             `;
         }
 
+        // ================= DINAMIKUS GENERÁLÓ =================
         async function openGenerator(itemIndex) {
+            // VALÓDI ENGEDÉLY ELLENŐRZÉS PROFIBB ABLAKKAL
             if (!sessionToken || !currentUser) {
                 showCustomAlert("Access Locked", "You must Login with Discord first to verify your permissions.", "Login via Discord", discordLogin, true);
                 return;
@@ -628,6 +624,7 @@
             
             let foundVariables = [];
             try {
+                // ITT TÖLTI BE A FÁJLT A TEMPLATES MAPPÁBÓL
                 const response = await fetch(`templates/${item.file}`);
                 if (!response.ok) throw new Error(`HTML File not found!`);
                 const htmlContent = await response.text();
@@ -823,6 +820,7 @@
             btn.disabled = false;
         }
 
+        // ÚJ: VALÓS WHOP LINKEK
         function buyPlan(plan) {
             const whopLinks = {
                 'resell': 'https://whop.com/receipter/resell-access',
