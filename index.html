@@ -6,31 +6,24 @@
     <title>receipt.er | Premium Email Receipt Generator</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     
     <style>
-        /* ==========================================================================
-           1. ALAPVETŐ VÁLTOZÓK ÉS GLOBÁLIS STÍLUSOK
-           ========================================================================== */
         :root {
             --bg-color: #000000;
             --card-bg: rgba(20, 20, 20, 0.6);
             --border-color: rgba(255, 255, 255, 0.1);
-            --accent-color: #5865F2; /* Discord Blurple */
-            --accent-hover: #4752c4;
         }
         
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-color); 
             color: #ffffff;
-            overflow-x: hidden; /* Ne lehessen oldalra görgetni mobilon */
+            overflow-x: hidden; 
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Rácsos háttér minta (Sötét, high-tech hatás) */
         .bg-grid {
             background-size: 40px 40px;
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -39,7 +32,6 @@
             -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 40%, transparent 95%);
         }
         
-        /* Üveg hatású kártyák (Glassmorphism) */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -54,7 +46,6 @@
             box-shadow: 0 15px 45px -10px rgba(255, 255, 255, 0.1);
         }
 
-        /* Gradient szöveg effektek */
         .text-gradient {
             background: linear-gradient(to right, #ffffff, #71717a);
             -webkit-background-clip: text;
@@ -63,123 +54,42 @@
             color: transparent;
         }
 
-        /* ==========================================================================
-           2. FEJLETT GÖRGETÉSI ANIMÁCIÓK (SCROLL REVEAL)
-           ========================================================================== */
+        .reveal-fade { opacity: 0; transition: opacity 0.8s ease-out; }
+        .reveal-fade.active { opacity: 1; }
         
-        /* Sima elhalványulás */
-        .reveal-fade { 
-            opacity: 0; 
-            transition: opacity 0.8s ease-out; 
-        }
-        .reveal-fade.active { 
-            opacity: 1; 
-        }
+        .reveal-slide-up { opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .reveal-slide-up.active { opacity: 1; transform: translateY(0); }
         
-        /* Alulról felfelé csúszás */
-        .reveal-slide-up { 
-            opacity: 0; 
-            transform: translateY(50px); 
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        }
-        .reveal-slide-up.active { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
+        .reveal-slide-left { opacity: 0; transform: translateX(-50px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .reveal-slide-left.active { opacity: 1; transform: translateX(0); }
         
-        /* Balról jobbra csúszás */
-        .reveal-slide-left { 
-            opacity: 0; 
-            transform: translateX(-50px); 
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        }
-        .reveal-slide-left.active { 
-            opacity: 1; 
-            transform: translateX(0); 
-        }
+        .reveal-slide-right { opacity: 0; transform: translateX(50px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .reveal-slide-right.active { opacity: 1; transform: translateX(0); }
         
-        /* Jobbról balra csúszás */
-        .reveal-slide-right { 
-            opacity: 0; 
-            transform: translateX(50px); 
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        }
-        .reveal-slide-right.active { 
-            opacity: 1; 
-            transform: translateX(0); 
-        }
-        
-        /* Nagyítás (Zoom-in) */
-        .reveal-zoom { 
-            opacity: 0; 
-            transform: scale(0.85); 
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        }
-        .reveal-zoom.active { 
-            opacity: 1; 
-            transform: scale(1); 
-        }
+        .reveal-zoom { opacity: 0; transform: scale(0.85); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .reveal-zoom.active { opacity: 1; transform: scale(1); }
 
-        /* Késleltetések (Stagger) a kártyákhoz */
         .stagger-1 { transition-delay: 100ms; }
         .stagger-2 { transition-delay: 200ms; }
         .stagger-3 { transition-delay: 300ms; }
         .stagger-4 { transition-delay: 400ms; }
 
-        /* ==========================================================================
-           3. MODAL (FELUGRÓ ABLAK) STÍLUSOK
-           ========================================================================== */
+        .modal-base { transition: opacity 0.4s ease, visibility 0.4s ease; }
+        .hidden-modal { opacity: 0; visibility: hidden; pointer-events: none; }
+        .active-modal { opacity: 1; visibility: visible; pointer-events: auto; }
         
-        .modal-base { 
-            transition: opacity 0.4s ease, visibility 0.4s ease; 
-        }
-        .hidden-modal { 
-            opacity: 0; 
-            visibility: hidden; 
-            pointer-events: none; 
-        }
-        .active-modal { 
-            opacity: 1; 
-            visibility: visible; 
-            pointer-events: auto; 
-        }
+        .store-card { transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .store-card:hover { transform: scale(1.03); border-color: rgba(255, 255, 255, 0.6); box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
 
-        /* Kártya hover animáció a sablonválasztóhoz */
-        .store-card { 
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        }
-        .store-card:hover { 
-            transform: scale(1.03); 
-            border-color: rgba(255, 255, 255, 0.6); 
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-        }
+        #mobileMenu { transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out; transform-origin: top; }
+        .mobile-menu-hidden { transform: scaleY(0); opacity: 0; pointer-events: none; }
+        .mobile-menu-active { transform: scaleY(1); opacity: 1; pointer-events: auto; }
 
-        /* ==========================================================================
-           4. MOBIL MENÜ ÉS SCROLLBAR STÍLUSOK
-           ========================================================================== */
-        
-        #mobileMenu {
-            transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
-            transform-origin: top;
-        }
-        .mobile-menu-hidden {
-            transform: scaleY(0);
-            opacity: 0;
-            pointer-events: none;
-        }
-        .mobile-menu-active {
-            transform: scaleY(1);
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* Görgetősáv (Scrollbar) dizájn */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #444; }
         
-        /* Alap HTML tag eltüntetések */
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
     </style>
@@ -466,7 +376,6 @@
                 
                 <form id="generatorForm" class="space-y-8" onsubmit="event.preventDefault(); submitGeneration();">
                     <div id="hiddenInputsBox" class="hidden"></div>
-                    
                     <div id="dynamicInputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"></div>
                     
                     <div id="totalPriceBox" class="hidden mt-10 bg-gradient-to-r from-green-900/40 to-green-800/20 border border-green-500/50 p-6 md:p-8 rounded-2xl flex justify-between items-center shadow-[0_0_30px_rgba(34,197,94,0.1)]">
@@ -585,7 +494,6 @@
     </div>
 
     <script>
-        // Az útvonal, ahol a Python aiohttp szerver fut
         const API_BASE_URL = "/bot-api";
 
         let currentUser = null; 
@@ -600,27 +508,23 @@
             const toggleBtn = document.getElementById('mobileMenuToggleBtn');
             
             if(menu.classList.contains('mobile-menu-hidden')) {
-                // Menü kinyitása
                 menu.classList.remove('mobile-menu-hidden');
                 menu.classList.add('mobile-menu-active');
                 hamburger.classList.add('hidden');
                 hamburger.classList.remove('block');
                 closeBtn.classList.remove('hidden');
                 closeBtn.classList.add('block');
-                toggleBtn.classList.add('bg-white/20');
-                toggleBtn.classList.add('text-white');
-                document.body.style.overflow = 'hidden'; // Ne lehessen görgetni alatta
+                toggleBtn.classList.add('bg-white/20', 'text-white');
+                document.body.style.overflow = 'hidden'; 
             } else {
-                // Menü bezárása
                 menu.classList.add('mobile-menu-hidden');
                 menu.classList.remove('mobile-menu-active');
                 hamburger.classList.remove('hidden');
                 hamburger.classList.add('block');
                 closeBtn.classList.add('hidden');
                 closeBtn.classList.remove('block');
-                toggleBtn.classList.remove('bg-white/20');
-                toggleBtn.classList.remove('text-white');
-                document.body.style.overflow = 'auto'; // Újra lehessen görgetni
+                toggleBtn.classList.remove('bg-white/20', 'text-white');
+                document.body.style.overflow = ''; 
             }
         }
 
@@ -637,14 +541,12 @@
             const iconContainer = icon.parentElement;
             
             if (isError) {
-                // Piros hiba ikon
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>';
                 icon.classList.add('text-red-500');
                 icon.classList.remove('text-white');
                 iconContainer.classList.add('border-red-500/30', 'bg-red-500/10');
                 iconContainer.classList.remove('border-white/10', 'bg-white/5');
             } else {
-                // Sima fehér info ikon
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
                 icon.classList.remove('text-red-500');
                 icon.classList.add('text-white');
@@ -663,99 +565,34 @@
         }
 
         // ==========================================================================
-        // GITHUB KÉP HIBAKEZELŐ (IMAGE FALLBACK SYSTEM)
-        // Biztosítja, hogy sose legyen törött kép ikon!
+        // ADATBÁZIS: A VISSZAÁLLÍTOTT EREDETI IMAGE KULCSOKKAL!
         // ==========================================================================
-        function handleImageError(imgElement, baseName) {
-            // Először megpróbálta a Local JPG-t.
-            if (!imgElement.dataset.triedLocalPng) {
-                // 2. Lépés: Local PNG
-                imgElement.dataset.triedLocalPng = "true";
-                imgElement.src = `images/${baseName}.png`;
-            } else if (!imgElement.dataset.triedGithubJpg) {
-                // 3. Lépés: GitHub Raw JPG
-                imgElement.dataset.triedGithubJpg = "true";
-                imgElement.src = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${baseName}.jpg`;
-            } else if (!imgElement.dataset.triedGithubPng) {
-                // 4. Lépés: GitHub Raw PNG
-                imgElement.dataset.triedGithubPng = "true";
-                imgElement.src = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${baseName}.png`;
-            } else if (!imgElement.dataset.triedPlaceholder) {
-                // 5. Lépés: Helyőrző kép
-                imgElement.dataset.triedPlaceholder = "true";
-                imgElement.src = `https://via.placeholder.com/400x300/111111/555555?text=${baseName}`;
-            }
-        }
-
-        // ==========================================================================
-        // INTERSECTION OBSERVER ANIMÁCIÓS MOTOR (Nagyon sima, mobilra optimalizált)
-        // ==========================================================================
-        document.addEventListener("DOMContentLoaded", () => {
-            const observerOptions = {
-                root: null,
-                rootMargin: '0px',
-                threshold: 0.15 // Amikor az elem 15%-a látszódik, indul az animáció
-            };
-
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                        // Miután megjelent, levehetjük a figyelést, hogy ne terhelje a gépet
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-            
-            // Kiválasztjuk az összes animálni kívánt elemet
-            const revealElements = document.querySelectorAll('.reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom');
-            revealElements.forEach(el => observer.observe(el));
-        });
-
-        // Biztonsági manuális trigger az oldal betöltésekor
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                if (elementTop < windowHeight - 50) { reveals[i].classList.add("active"); }
-            }
-        }
-        window.addEventListener("scroll", reveal);
-        setTimeout(reveal, 100);
-
-        // ==========================================================================
-        // ADATBÁZIS: A sablonok és tulajdonságaik
-        // ==========================================================================
-        // A "kép" (image) attribútum kivéve, mert dinamikusan szedjük a Githubról!
-        
         const receiptData = {
             Hungarian: [
-                { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", file: "BalazsKICKS.html" },
-                { name: "OnSize", status: "Verified", tag: "Sneaker", file: "OnSize.html" },
-                { name: "Footshop HU", status: "Verified", tag: "Sneaker", file: "FootshopHU.html" },
-                { name: "Nike HU", status: "Verified", tag: "Sportswear", file: "NikeHU.html" },
-                { name: "Adidas HU", status: "Verified", tag: "Sportswear", file: "AdidasHU.html" },
-                { name: "Tiszacipo", status: "Verified", tag: "Local", file: "Tisza.html" },
-                { name: "True To Sole", status: "Verified", tag: "Sneaker", file: "TrueToSole.html" }
+                { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", image: "balazskicks.jpg", file: "BalazsKICKS.html" },
+                { name: "OnSize", status: "Verified", tag: "Sneaker", image: "onsize.jpg", file: "OnSize.html" },
+                { name: "Footshop HU", status: "Verified", tag: "Sneaker", image: "footshop.jpg", file: "FootshopHU.html" },
+                { name: "Nike HU", status: "Verified", tag: "Sportswear", image: "nike.jpg", file: "NikeHU.html" },
+                { name: "Adidas HU", status: "Verified", tag: "Sportswear", image: "adidas.jpg", file: "AdidasHU.html" },
+                { name: "Tiszacipo", status: "Verified", tag: "Local", image: "tisza.jpg", file: "Tisza.html" },
+                { name: "True To Sole", status: "Verified", tag: "Sneaker", image: "tts.jpg", file: "TrueToSole.html" }
             ],
             International: [
-                { name: "Louis Vuitton", status: "Luxury", tag: "Fashion", file: "Louis Vuitton.html" },
-                { name: "StockX", status: "Verified", tag: "Marketplace", file: "StockX.html" },
-                { name: "Apple", status: "Tech", tag: "Electronics", file: "Apple.html" },
-                { name: "Dior", status: "Luxury", tag: "Fashion", file: "DIOR.html" },
-                { name: "GOAT", status: "Verified", tag: "Marketplace", file: "GOAT.html" },
-                { name: "Moncler", status: "Luxury", tag: "Fashion", file: "MONCLER.html" },
-                { name: "Hermes", status: "Luxury", tag: "Fashion", file: "Hermes.html" },
-                { name: "Gucci", status: "Luxury", tag: "Fashion", file: "Gucci.html" },
-                { name: "Prada", status: "Luxury", tag: "Fashion", file: "Prada.html" },
-                { name: "Farfetch", status: "Luxury", tag: "Marketplace", file: "Farfetch.html" },
-                { name: "SSENSE", status: "Luxury", tag: "Marketplace", file: "SSENSE.html" },
-                { name: "Grailed", status: "Verified", tag: "Marketplace", file: "Grailed.html" }
+                { name: "Louis Vuitton", status: "Luxury", tag: "Fashion", image: "louisvuitton.jpg", file: "Louis Vuitton.html" },
+                { name: "StockX", status: "Verified", tag: "Marketplace", image: "stockx.jpg", file: "StockX.html" },
+                { name: "Apple", status: "Tech", tag: "Electronics", image: "apple.jpg", file: "Apple.html" },
+                { name: "Dior", status: "Luxury", tag: "Fashion", image: "dior.jpg", file: "DIOR.html" },
+                { name: "GOAT", status: "Verified", tag: "Marketplace", image: "goat.jpg", file: "GOAT.html" },
+                { name: "Moncler", status: "Luxury", tag: "Fashion", image: "moncler.jpg", file: "MONCLER.html" },
+                { name: "Hermes", status: "Luxury", tag: "Fashion", image: "hermes.jpg", file: "Hermes.html" },
+                { name: "Gucci", status: "Luxury", tag: "Fashion", image: "gucci.jpg", file: "Gucci.html" },
+                { name: "Prada", status: "Luxury", tag: "Fashion", image: "prada.jpg", file: "Prada.html" },
+                { name: "Farfetch", status: "Luxury", tag: "Marketplace", image: "farfetch.jpg", file: "Farfetch.html" },
+                { name: "SSENSE", status: "Luxury", tag: "Marketplace", image: "ssense.jpg", file: "SSENSE.html" },
+                { name: "Grailed", status: "Verified", tag: "Marketplace", image: "grailed.jpg", file: "Grailed.html" }
             ]
         };
 
-        // Rendezési logika a sablonokhoz
         const sortOrder = { "Luxury": 1, "Premium": 2, "Tech": 3, "Verified": 4 };
         const receiptModal = document.getElementById('receiptModal');
         const generatorModal = document.getElementById('generatorModal');
@@ -770,7 +607,6 @@
         // ==========================================================================
         function openSettings() {
             if(userSettings) {
-                // Visszatöltjük a böngészőből a lementett adatokat az űrlapba
                 document.getElementById('set_email').value = userSettings.email || '';
                 document.getElementById('set_name').value = userSettings.name || '';
                 document.getElementById('set_street').value = userSettings.street || '';
@@ -779,7 +615,7 @@
                 document.getElementById('set_country').value = userSettings.country || '';
                 document.getElementById('set_card').value = userSettings.card || '';
             }
-            document.body.style.overflow = 'hidden'; // Háttér görgetésének blokkolása
+            document.body.style.overflow = 'hidden'; 
             settingsModal.classList.remove('hidden-modal');
             settingsModal.classList.add('active-modal');
         }
@@ -787,14 +623,12 @@
         function closeSettings() {
             settingsModal.classList.remove('active-modal');
             settingsModal.classList.add('hidden-modal');
-            // Csak akkor engedjük újra a görgetést, ha nincs nyitva másik Modal
             if(receiptModal.classList.contains('hidden-modal') && generatorModal.classList.contains('hidden-modal')) {
-                document.body.style.overflow = 'auto';
+                document.body.style.overflow = '';
             }
         }
 
         function saveSettings() {
-            // Adatok kinyerése az űrlapból
             userSettings = {
                 email: document.getElementById('set_email').value,
                 name: document.getElementById('set_name').value,
@@ -804,10 +638,8 @@
                 country: document.getElementById('set_country').value,
                 card: document.getElementById('set_card').value
             };
-            // Titkosítva mentjük a böngésző LocalStorage-éba
             localStorage.setItem('receiptSettings', JSON.stringify(userSettings));
             
-            // Sikeres mentés jelzése
             const alertBox = document.getElementById('settingsAlert');
             alertBox.classList.remove('hidden');
             setTimeout(() => { 
@@ -817,7 +649,6 @@
         }
 
         function generateSettingsAddress(type) {
-            // Generálunk egy random kártyaszámot 1000 és 9999 között
             const randomCard = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('set_card').value = randomCard;
 
@@ -841,7 +672,6 @@
                 const cities = [{c: "Budapest", p: "1053"}, {c: "Debrecen", p: "4024"}, {c: "Szeged", p: "4002"}, {c: "Győr", p: "4000"}];
                 
                 let rCity = cities[Math.floor(Math.random()*cities.length)];
-                // Magyarországon a vezetéknév van elöl
                 document.getElementById('set_name').value = lastNames[Math.floor(Math.random()*lastNames.length)] + " " + firstNames[Math.floor(Math.random()*firstNames.length)];
                 document.getElementById('set_street').value = streets[Math.floor(Math.random()*streets.length)];
                 document.getElementById('set_city').value = rCity.c;
@@ -858,7 +688,6 @@
             document.getElementById('modalTitle').textContent = category + " Receipts";
             const modalContent = document.getElementById('modalContent');
             
-            // Töltőképernyő amíg a Vercel-en ellenőrzi a fájlokat
             modalContent.innerHTML = `
                 <div class="col-span-full py-20 flex flex-col items-center justify-center gap-4">
                     <svg class="w-10 h-10 animate-spin text-zinc-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -870,11 +699,9 @@
             receiptModal.classList.remove('hidden-modal');
             receiptModal.classList.add('active-modal');
             
-            // Kiszűrjük azokat a sablonokat, amik nincsenek benne ténylegesen a Vercel "templates" mappában
             const validItems = [];
             await Promise.all(receiptData[category].map(async (item) => {
                 try {
-                    // Csinálunk egy "HEAD" kérést (csak a fejlécet kéri le, nem a fájlt, így villámgyors)
                     const response = await fetch(`templates/${item.file}`, { method: 'HEAD' });
                     if (response.ok) {
                         validItems.push(item);
@@ -884,7 +711,6 @@
                 }
             }));
 
-            // Sorrendbe állítás a fontosság szerint
             const sortedData = validItems.sort((a, b) => {
                 return (sortOrder[a.status] || 99) - (sortOrder[b.status] || 99);
             });
@@ -902,29 +728,27 @@
                 `;
             }
 
-            // Kártyák generálása
             sortedData.forEach((item, index) => {
-                // Státusz jelvény színezése
                 let statusColor = "bg-white/10 text-white border-white/20";
                 if(item.status === "Luxury") statusColor = "bg-amber-500/10 text-amber-400 border-amber-500/20 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]";
                 if(item.status === "Premium") statusColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
                 if(item.status === "Tech") statusColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
                 if(item.status === "Verified") statusColor = "bg-green-500/10 text-green-400 border-green-500/20";
 
-                // Biztonságos URL kódolás a képek lekéréséhez (Szóközök %20-ra cserélése)
-                const baseName = item.file.replace('.html', '');
-                const encodedName = encodeURIComponent(baseName);
-                
-                // Elsődleges próbálkozás a helyi képre (A global error handler intézi a többit!)
-                const initialImageSrc = `images/${encodedName}.jpg`;
+                // Végleges Github kép elérési út
+                const githubUrl = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${item.image}`;
+                const fallbackImg = `https://via.placeholder.com/400x300/111111/555555?text=${encodeURIComponent(item.name)}`;
+
+                // Ha a lokális kép nincs meg, azonnal kéri a Github linket
+                const fallbackChain = `this.onerror=null; this.src='${githubUrl}'; this.onerror=function(){this.src='${fallbackImg}'};`;
 
                 const card = `
                     <div onclick="openGenerator(${index})" class="store-card glass-card rounded-2xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]" style="animation-delay: ${index * 0.05}s">
                         <div class="h-40 md:h-48 bg-black/60 flex items-center justify-center relative overflow-hidden">
-                            <img src="${initialImageSrc}" 
+                            <img src="images/${item.image}" 
                                  alt="${item.name} Receipt Preview" 
                                  class="absolute inset-0 w-full h-full object-contain p-6 opacity-80 group-hover:opacity-20 transition-opacity duration-500 group-hover:scale-105" 
-                                 onerror="handleImageError(this, '${encodedName}')">
+                                 onerror="${fallbackChain}">
                                  
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-500 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100">
                                 <span class="bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-black uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.4)]">
@@ -947,13 +771,10 @@
             });
         }
 
-        // TÖKÉLETES BACK GOMB: Most már 100%-osan zárja a modalt, JS hiba nélkül!
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.classList.remove('active-modal');
             modal.classList.add('hidden-modal');
-            
-            // Ha a fő Receipt modal zárult be, engedjük a weblapot újra görgetni
             if(modalId === 'receiptModal') {
                 document.body.style.overflow = ''; 
             }
@@ -964,7 +785,6 @@
         // ==========================================================================
         
         function discordLogin() {
-            // Itt adod meg a saját Client ID-dat a Developer Portalról!
             const discordOAuthUrl = "https://discord.com/oauth2/authorize?client_id=1482014502345117766&response_type=code&redirect_uri=https%3A%2F%2Freceipt-er.vercel.app&scope=identify+guilds"; 
             window.location.href = discordOAuthUrl;
         }
@@ -974,7 +794,6 @@
             const code = urlParams.get('code');
 
             if (code) {
-                // Eltüntetjük a kódot az URL-ből, hogy ne tűnjön csúnyának
                 window.history.replaceState({}, document.title, "/");
                 try {
                     const response = await fetch(`${API_BASE_URL}/login`, {
@@ -989,7 +808,6 @@
                         userPlan = data.plan;    
                         sessionToken = data.token; 
                         
-                        // Titkosan elmentjük a böngészőbe a tokent az auto-loginhoz
                         localStorage.setItem('sessionToken', sessionToken);
                         updateAuthUI();
                         
@@ -1002,7 +820,6 @@
                     showCustomAlert("Connection Error", "Could not connect to the Backend API. Make sure the Python bot is running on your server and the port is open!", "Close", null, true);
                 }
             } else if (sessionToken) {
-                // AUTO-LOGIN: Ha van már elmentett tokenünk (Pl. F5 frissítés után)
                 try {
                     const response = await fetch(`${API_BASE_URL}/user_info`, {
                         method: 'POST',
@@ -1017,7 +834,6 @@
                         localStorage.setItem('sessionToken', sessionToken);
                         updateAuthUI();
                     } else {
-                        // Ha a token lejárt vagy érvénytelen (pl. bot újraindulás de nincs fájl mentés)
                         localStorage.removeItem('sessionToken');
                         sessionToken = null;
                     }
@@ -1034,8 +850,7 @@
             
             if (!currentUser) return; 
 
-            // Színezzük a badge-et a jogok alapján
-            let badgeColor = 'text-zinc-300 bg-zinc-800 border-zinc-700'; // Default
+            let badgeColor = 'text-zinc-300 bg-zinc-800 border-zinc-700'; 
             if (userPlan === 'Premium') badgeColor = 'text-amber-400 bg-amber-500/10 border-amber-500/30 drop-shadow-[0_0_5px_rgba(251,191,36,0.4)]';
             if (userPlan === 'Receipt') badgeColor = 'text-green-400 bg-green-500/10 border-green-500/30';
             
@@ -1055,7 +870,6 @@
             authAreaDesktop.innerHTML = htmlContent;
             authAreaMobile.innerHTML = htmlContent;
             
-            // Eltüntetjük a mobil menüben lévő nagy kék Login gombot, ha már bent van
             if(mobileLoginBtn) mobileLoginBtn.style.display = 'none';
         }
 
@@ -1063,7 +877,6 @@
         // DINAMIKUS GENERÁLÓ MOTOR (HTML ELEMZŐ)
         // ==========================================================================
         async function openGenerator(itemIndex) {
-            // Jogosultság ellenőrzése
             if (!sessionToken || !currentUser) {
                 showCustomAlert("Access Locked", "You must Login with Discord first to verify your permissions securely via OAuth2.", "Login via Discord", discordLogin, true);
                 return;
@@ -1076,19 +889,17 @@
                 return;
             }
 
-            // Profil beállítások ellenőrzése
             userSettings = JSON.parse(localStorage.getItem('receiptSettings'));
             if(!userSettings || !userSettings.street || !userSettings.card) {
                 showCustomAlert("Profile Required", "Please configure your Global Settings (Email, Physical Address) before generating a receipt.", "Open Settings", openSettings, true);
                 return;
             }
 
-            // Átváltás a másik Modalra
             receiptModal.classList.remove('active-modal');
             receiptModal.classList.add('hidden-modal');
 
             const item = currentCategoryData[itemIndex];
-            document.getElementById('generatorBrandName').textContent = item.name + " Loading...";
+            document.getElementById('generatorBrandName').textContent = item.name;
             
             const dynamicInputsDiv = document.getElementById('dynamicInputs');
             const hiddenInputsBox = document.getElementById('hiddenInputsBox');
@@ -1097,21 +908,16 @@
             
             let foundVariables = [];
             
-            // ==========================================================================
-            // HTML TARTALOM BEOLVASÁSA ÉS ELEMZÉSE (REGEX)
-            // ==========================================================================
             try {
-                // Beolvassuk magát a nyers HTML fájlt a Vercel szerveréről
                 const response = await fetch(`templates/${item.file}`);
                 if (!response.ok) throw new Error(`HTML File not found! HTTP ${response.status}`);
                 const htmlContent = await response.text();
                 
-                // Regex: Megkeresünk mindent, ami {kapcsos_zarojelek} között van (Pl: {product_name})
                 const regex = /\{([a-zA-Z0-9_]+)\}/g; 
                 let match;
                 const varsSet = new Set();
                 while ((match = regex.exec(htmlContent)) !== null) {
-                    varsSet.add(match[1]); // Csak a nevet mentjük, a zárójeleket levágjuk
+                    varsSet.add(match[1]); 
                 }
                 foundVariables = [...varsSet];
             } catch (err) {
@@ -1121,10 +927,9 @@
 
             let hasPrice = false;
 
-            // Szállítási és rendelési dátumok dinamikus generálása
             const today = new Date();
             const delivery = new Date();
-            delivery.setDate(today.getDate() + 4); // +4 nap szállítás
+            delivery.setDate(today.getDate() + 4);
 
             let formattedDate = currentRegion === 'Hungarian' 
                 ? today.toLocaleDateString('hu-HU').replace(/-/g, '. ') 
@@ -1134,14 +939,11 @@
                 ? delivery.toLocaleDateString('hu-HU').replace(/-/g, '. ') 
                 : delivery.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Kiszűrjük azokat, amiket a Python Backend teljesen automatikusan megcsinál!
-            // Order_number = random, Total_Price = matematika. Ezeket sosem kérjük be.
             const uniqueVars = foundVariables.filter(v => {
                 const l = v.toLowerCase();
                 return l !== 'order_number' && l !== 'total_price' && l !== 'email';
             });
 
-            // Ezeket az adatokat a Settings Modalból szedjük ki. Ezeket sem kérjük be újra.
             const settingsVars = [
                 'customer_name', 'client_name', 'shipping_address', 'billing_address', 'delivery_address', 'address',
                 'city', 'zip', 'postal_code', 'country', 'street',
@@ -1150,18 +952,15 @@
                 'subtotal', 'subtotal_price'
             ];
 
-            // Végigmegyünk a talált változókon, és felépítjük a formot
             uniqueVars.forEach(variable => {
                 const lowerVar = variable.toLowerCase();
                 
-                // Keresünk benne árra utaló szavakat, hogy tudjuk, ezt be kell vonni az okos matematikába
                 const isPriceField = (lowerVar.includes('price') || lowerVar.includes('fee') || lowerVar.includes('cost') || lowerVar.includes('tax') || lowerVar.includes('ar')) && !lowerVar.includes('subtotal');
                 if(isPriceField) hasPrice = true;
                 
                 const isSettingsVar = settingsVars.includes(lowerVar);
 
                 if (isSettingsVar) {
-                    // Ha a Settings része, csinálunk egy láthatatlan (Hidden) inputot
                     let val = "";
                     if(lowerVar.includes('name')) val = userSettings.name;
                     else if(lowerVar === 'city') val = userSettings.city;
@@ -1173,20 +972,15 @@
                     else if(lowerVar.includes('delivery')) val = formattedDelDate;
                     else if(lowerVar === 'card' || lowerVar === 'card_type' || lowerVar === 'card_brand') val = "Visa";
                     else if(lowerVar.includes('card')) val = userSettings.card;
-                    else if(lowerVar.includes('subtotal')) val = ""; // A Python majd kiszámolja!
+                    else if(lowerVar.includes('subtotal')) val = ""; 
                     
                     hiddenInputsBox.innerHTML += `<input type="hidden" id="hidden_${variable}" name="${variable}" value="${val}">`;
                 } else {
-                    // Ha egyedi adat (Pl. product_name, size, color), csinálunk neki egy szép Input dobozt!
-                    
-                    // Szebbé tesszük a változó nevét: "product_name" -> "Product Name"
                     const niceLabel = variable.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                     
-                    // Ha ár mező, hozzáadunk egy OnInput triggert, ami valós időben számolja a Total-t
                     const extraClass = isPriceField ? 'calc-price-input text-green-400 font-bold' : 'text-white';
                     const onInputAttr = isPriceField ? `oninput="formatAndCalculate(this)"` : '';
                     
-                    // Okos Placeholder a jobb User Experience-ért
                     let ph = "Enter " + niceLabel;
                     if(isPriceField) ph = "e.g. 15000";
                     if(lowerVar.includes('image') || lowerVar.includes('link') || lowerVar.includes('url')) ph = "https://cdn.discordapp.com/...";
@@ -1206,7 +1000,6 @@
                 }
             });
 
-            // Ha van ár az űrlapon, láthatóvá tesszük az élő számológép dobozát
             const totalBox = document.getElementById('totalPriceBox');
             if (hasPrice) {
                 totalBox.classList.remove('hidden');
@@ -1215,11 +1008,9 @@
                 totalBox.classList.add('hidden');
             }
 
-            document.getElementById('generatorBrandName').textContent = item.name;
             generatorModal.classList.remove('hidden-modal');
             generatorModal.classList.add('active-modal');
             
-            // Újra triggereljük az animációkat a Modalban lévő elemekre
             setTimeout(reveal, 50);
         }
 
@@ -1227,24 +1018,19 @@
         // ÉLŐ MATEMATIKA: Számológép az űrlapon
         // ==========================================================================
         function formatAndCalculate(inputElement) {
-            // Betűk eltávolítása, csak a számokat engedjük (hogy tudjunk vele számolni)
             let rawValue = inputElement.value.replace(/[^0-9]/g, '');
             if (rawValue !== '') {
                 let number = parseInt(rawValue, 10);
                 
-                // Formázás valós időben, miközben gépel (Ezresek elválasztása)
                 if (currentRegion === 'Hungarian') {
-                    // Magyar: 119 990
                     inputElement.value = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
                 } else {
-                    // Amerikai: 119.990
                     inputElement.value = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 }
             } else {
                 inputElement.value = '';
             }
 
-            // Ha az alapárat gépeli be, automatikusan lemásoljuk a rejtett Subtotal inputba is
             const lowerName = inputElement.name.toLowerCase();
             if(lowerName === 'product_price' || lowerName === 'item_price' || lowerName === 'termek_ar') {
                 const hiddenInputs = document.querySelectorAll('#hiddenInputsBox input');
@@ -1255,23 +1041,19 @@
                 });
             }
 
-            // Minden módosításnál újraszámoljuk az összesítést!
             calculateTotal();
         }
 
         function calculateTotal() {
             let total = 0;
-            // Megkeresünk minden ár típusú inputot (Price, Tax, Shipping)
             const inputs = document.querySelectorAll('.calc-price-input');
             inputs.forEach(input => {
-                // Kinyerjük a nyers számot a formázott szövegből (Pl. "15 000" -> 15000)
                 const rawVal = input.value.replace(/[^0-9]/g, '');
                 if(rawVal !== '') { 
                     total += parseInt(rawVal, 10); 
                 }
             });
 
-            // Formázva kiírjuk a zöld dobozba
             let formattedTotal = "";
             if (currentRegion === 'Hungarian') {
                 formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " Ft";
@@ -1293,37 +1075,31 @@
         // ==========================================================================
         async function submitGeneration() {
             const btn = document.getElementById('submitBtn');
-            // Betöltő ikon animáció a gombon
             btn.innerHTML = `<svg class="w-6 h-6 animate-spin text-black" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Interfacing with Core...`;
             btn.disabled = true;
             btn.classList.add('opacity-70');
 
-            // Létrehozzuk az adatcsomagot (Payload) amit a Python vár
             const payload = {
-                token: sessionToken, // Az Auth Token a jogokhoz
+                token: sessionToken, 
                 template: document.getElementById('generatorBrandName').textContent.replace(' Loading...', ''),
                 variables: {}
             };
 
-            // Összeszedjük a felhasználó által kitöltött látható mezőket
             const inputs = document.querySelectorAll('#generatorForm input');
             inputs.forEach(i => {
                 payload.variables[i.name] = i.value;
             });
 
-            // Hozzáadjuk a láthatatlan (Settingsből jövő) mezőket is
             const hiddenInputs = document.querySelectorAll('#hiddenInputsBox input');
             hiddenInputs.forEach(i => {
                 payload.variables[i.name] = i.value;
             });
             
-            // Speciális felülírás: Ha véletlenül valahogy lemaradna az email...
             if(userSettings && userSettings.email) {
                 payload.variables['email'] = userSettings.email;
             }
 
             try {
-                // Postázás az aszinkron aiohttp szervernek
                 const response = await fetch(`${API_BASE_URL}/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1331,7 +1107,6 @@
                 });
 
                 if(response.ok) {
-                    // Ha a Python sikerrel visszaigazol:
                     document.getElementById('sendStatus').classList.remove('hidden');
                     setTimeout(() => { 
                         document.getElementById('sendStatus').classList.add('hidden');
@@ -1339,16 +1114,13 @@
                         showCustomAlert("Receipt Dispatched", "The receipt has been successfully compiled and sent to your physical email address via secure SMTP. Check your inbox (and spam folder)!", "Acknowledge");
                     }, 2000);
                 } else {
-                    // Ha a Python elakad (Pl. hibás token, rossz sablon)
                     const errorText = await response.text();
                     showCustomAlert("Compilation Failed", "Core Exception: " + errorText, "Dismiss", null, true);
                 }
             } catch (err) {
-                // Ha a szerver egyáltalán nem is fut, vagy a port le van zárva
                 showCustomAlert("Network Error", "Failed to reach the Backend API Server. Is the Python process running on your VPS and is port 8080 exposed?", "Dismiss", null, true);
             }
 
-            // Visszaállítjuk a gombot eredeti formájába
             btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg> Compile & Send Email`;
             btn.disabled = false;
             btn.classList.remove('opacity-70');
@@ -1371,7 +1143,6 @@
             }
         }
 
-        // CSS Alapú Fade-In betöltődik JavaScriptből a teljes biztonságért
         document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }</style>`);
     </script>
 </body>
