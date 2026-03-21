@@ -4,20 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>receipt.er | Premium Email Receipt Generator</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    
     <style>
+        /* ==========================================================================
+           1. ALAPVETŐ VÁLTOZÓK ÉS GLOBÁLIS STÍLUSOK
+           ========================================================================== */
         :root {
             --bg-color: #000000;
             --card-bg: rgba(20, 20, 20, 0.6);
             --border-color: rgba(255, 255, 255, 0.1);
+            --accent-color: #5865F2; /* Discord Blurple */
+            --accent-hover: #4752c4;
         }
+        
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-color); 
             color: #ffffff;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Ne lehessen oldalra görgetni mobilon */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+        
+        /* Rácsos háttér minta (Sötét, high-tech hatás) */
         .bg-grid {
             background-size: 40px 40px;
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -25,84 +38,183 @@
             mask-image: linear-gradient(to bottom, transparent, black, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 40%, transparent 95%);
         }
+        
+        /* Üveg hatású kártyák (Glassmorphism) */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
-            transition: all 0.4s ease;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
+        
         .glass-card-hover:hover {
             border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px -10px rgba(255,255,255,0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 45px -10px rgba(255, 255, 255, 0.1);
         }
-        
-        /* ÚJ: Kiterjesztett Animációk */
-        .reveal-up { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal-up.active { opacity: 1; transform: translateY(0); }
-        
-        .reveal-left { opacity: 0; transform: translateX(-40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal-left.active { opacity: 1; transform: translateX(0); }
-        
-        .reveal-right { opacity: 0; transform: translateX(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal-right.active { opacity: 1; transform: translateX(0); }
-        
-        .reveal-scale { opacity: 0; transform: scale(0.9); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal-scale.active { opacity: 1; transform: scale(1); }
 
-        .delay-100 { transition-delay: 100ms; }
-        .delay-200 { transition-delay: 200ms; }
-        .delay-300 { transition-delay: 300ms; }
-        .delay-400 { transition-delay: 400ms; }
-
-        .modal-base { transition: opacity 0.4s ease, visibility 0.4s ease; }
-        .hidden-modal { opacity: 0; visibility: hidden; pointer-events: none; }
-        .active-modal { opacity: 1; visibility: visible; pointer-events: auto; }
-        
-        .store-card { transition: all 0.3s ease; }
-        .store-card:hover { transform: scale(1.02); border-color: rgba(255, 255, 255, 0.5); }
+        /* Gradient szöveg effektek */
         .text-gradient {
             background: linear-gradient(to right, #ffffff, #71717a);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
         }
+
+        /* ==========================================================================
+           2. FEJLETT GÖRGETÉSI ANIMÁCIÓK (SCROLL REVEAL)
+           ========================================================================== */
+        
+        /* Sima elhalványulás */
+        .reveal-fade { 
+            opacity: 0; 
+            transition: opacity 0.8s ease-out; 
+        }
+        .reveal-fade.active { 
+            opacity: 1; 
+        }
+        
+        /* Alulról felfelé csúszás */
+        .reveal-slide-up { 
+            opacity: 0; 
+            transform: translateY(50px); 
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .reveal-slide-up.active { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+        
+        /* Balról jobbra csúszás */
+        .reveal-slide-left { 
+            opacity: 0; 
+            transform: translateX(-50px); 
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .reveal-slide-left.active { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+        
+        /* Jobbról balra csúszás */
+        .reveal-slide-right { 
+            opacity: 0; 
+            transform: translateX(50px); 
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .reveal-slide-right.active { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+        
+        /* Nagyítás (Zoom-in) */
+        .reveal-zoom { 
+            opacity: 0; 
+            transform: scale(0.85); 
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .reveal-zoom.active { 
+            opacity: 1; 
+            transform: scale(1); 
+        }
+
+        /* Késleltetések (Stagger) a kártyákhoz */
+        .stagger-1 { transition-delay: 100ms; }
+        .stagger-2 { transition-delay: 200ms; }
+        .stagger-3 { transition-delay: 300ms; }
+        .stagger-4 { transition-delay: 400ms; }
+
+        /* ==========================================================================
+           3. MODAL (FELUGRÓ ABLAK) STÍLUSOK
+           ========================================================================== */
+        
+        .modal-base { 
+            transition: opacity 0.4s ease, visibility 0.4s ease; 
+        }
+        .hidden-modal { 
+            opacity: 0; 
+            visibility: hidden; 
+            pointer-events: none; 
+        }
+        .active-modal { 
+            opacity: 1; 
+            visibility: visible; 
+            pointer-events: auto; 
+        }
+
+        /* Kártya hover animáció a sablonválasztóhoz */
+        .store-card { 
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .store-card:hover { 
+            transform: scale(1.03); 
+            border-color: rgba(255, 255, 255, 0.6); 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        /* ==========================================================================
+           4. MOBIL MENÜ ÉS SCROLLBAR STÍLUSOK
+           ========================================================================== */
+        
+        #mobileMenu {
+            transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+            transform-origin: top;
+        }
+        .mobile-menu-hidden {
+            transform: scaleY(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .mobile-menu-active {
+            transform: scaleY(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Görgetősáv (Scrollbar) dizájn */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+        
+        /* Alap HTML tag eltüntetések */
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
+
 <body class="antialiased selection:bg-white selection:text-black flex flex-col min-h-screen relative">
 
     <div class="absolute inset-0 z-[-1] bg-grid h-[100vh] w-full pointer-events-none"></div>
 
-    <header class="fixed top-0 w-full z-40 border-b border-white/10 bg-black/50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <div class="text-2xl font-extrabold tracking-tighter cursor-pointer text-white flex items-center gap-2" onclick="window.scrollTo(0,0)">
+    <header class="fixed top-0 w-full z-40 border-b border-white/10 bg-black/70 backdrop-blur-lg">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 h-20 flex justify-between items-center">
+            
+            <div class="text-2xl font-extrabold tracking-tighter cursor-pointer text-white flex items-center gap-2 transition-transform hover:scale-105" onclick="window.scrollTo(0,0)">
                 receipt.er
             </div>
             
             <div class="hidden md:flex gap-8 items-center">
                 <nav class="flex gap-6 items-center text-sm font-medium">
-                    <a href="#how-it-works" class="text-zinc-400 hover:text-white transition-all">How it Works</a>
-                    <a href="#receipts-section" class="text-zinc-400 hover:text-white transition-all">Receipts</a>
-                    <a href="#pricing" class="text-zinc-400 hover:text-white transition-all">Pricing</a>
+                    <a href="#how-it-works" class="text-zinc-400 hover:text-white transition-colors">How it Works</a>
+                    <a href="#receipts-section" class="text-zinc-400 hover:text-white transition-colors">Receipts</a>
+                    <a href="#pricing" class="text-zinc-400 hover:text-white transition-colors">Pricing</a>
                     
-                    <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="text-zinc-400 hover:text-[#5865F2] transition-all flex items-center gap-1.5 font-bold">
+                    <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="text-zinc-400 hover:text-[#5865F2] transition-colors flex items-center gap-1.5 font-bold">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
                         Join Discord
                     </a>
 
-                    <button onclick="openSettings()" class="text-zinc-400 hover:text-white transition-all flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                    <button onclick="openSettings()" class="text-zinc-400 hover:text-white transition-all flex items-center gap-1.5 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg border border-white/10">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         Settings
                     </button>
                 </nav>
+                
                 <div id="userAuthAreaDesktop">
-                    <button onclick="discordLogin()" class="group relative px-5 py-2.5 bg-[#5865F2] text-white text-sm font-bold rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-[0_0_15px_rgba(88,101,242,0.4)]">
+                    <button onclick="discordLogin()" class="group relative px-6 py-2.5 bg-[#5865F2] text-white text-sm font-bold rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-[0_0_20px_rgba(88,101,242,0.4)]">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
                         <span>Login</span>
                     </button>
@@ -111,230 +223,266 @@
 
             <div class="flex items-center gap-4 md:hidden">
                 <div id="userAuthAreaMobile"></div>
-                <button onclick="toggleMobileMenu()" class="text-zinc-400 hover:text-white focus:outline-none">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <button id="mobileMenuToggleBtn" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white focus:outline-none p-2 bg-white/5 rounded-lg border border-white/10 transition-colors">
+                    <svg id="hamburgerIcon" class="w-6 h-6 block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
         </div>
 
-        <div id="mobileMenu" class="hidden md:hidden absolute top-20 left-0 w-full bg-black/95 backdrop-blur-xl border-b border-white/10 flex-col py-6 px-6 gap-6 z-40 shadow-2xl">
-            <a href="#how-it-works" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium">How it Works</a>
-            <a href="#receipts-section" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium">Receipts</a>
-            <a href="#pricing" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium">Pricing</a>
-            <a href="https://discord.gg/XaafBJt4HM" target="_blank" onclick="toggleMobileMenu()" class="text-[#5865F2] hover:text-white text-lg font-bold flex items-center gap-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
-                Join Discord
+        <div id="mobileMenu" class="absolute top-20 left-0 w-full bg-black/95 backdrop-blur-2xl border-b border-white/10 flex-col py-8 px-6 gap-6 z-30 shadow-2xl mobile-menu-hidden md:hidden">
+            <a href="#how-it-works" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium text-center w-full block py-2 border-b border-white/5">How it Works</a>
+            <a href="#receipts-section" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium text-center w-full block py-2 border-b border-white/5">Receipts</a>
+            <a href="#pricing" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium text-center w-full block py-2 border-b border-white/5">Pricing</a>
+            
+            <a href="https://discord.gg/XaafBJt4HM" target="_blank" onclick="toggleMobileMenu()" class="text-[#5865F2] hover:text-white text-lg font-bold flex items-center justify-center gap-2 py-2">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
+                Join Discord Server
             </a>
-            <hr class="border-white/10">
-            <button onclick="openSettings(); toggleMobileMenu();" class="text-white hover:text-zinc-300 text-lg font-medium flex items-center gap-2 bg-white/10 px-4 py-3 rounded-lg w-full justify-center">
+            
+            <button onclick="openSettings(); toggleMobileMenu();" class="text-white hover:text-black hover:bg-white text-lg font-bold flex items-center gap-2 bg-white/10 px-4 py-4 rounded-xl w-full justify-center transition-all border border-white/10 mt-4">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                Settings
+                Configure Settings
             </button>
+            
             <div id="mobileLoginBtn" class="w-full">
-                <button onclick="discordLogin()" class="w-full px-5 py-3 bg-[#5865F2] text-white text-lg font-bold rounded-lg flex items-center justify-center gap-2">
+                <button onclick="discordLogin()" class="w-full px-5 py-4 bg-[#5865F2] text-white text-lg font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(88,101,242,0.4)]">
                     Login with Discord
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow pt-24 md:pt-32 w-full">
+    <main class="flex-grow pt-24 md:pt-32 w-full overflow-x-hidden">
+        
         <section class="max-w-5xl mx-auto px-4 md:px-6 pt-16 md:pt-24 pb-20 md:pb-32 text-center">
-            <div class="reveal-scale inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs font-medium text-zinc-300 mb-8">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                Status: ONLINE
+            <div class="reveal-zoom inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 text-xs font-bold text-green-400 mb-8 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                SYSTEM ONLINE
             </div>
-            <h1 class="reveal-up delay-100 text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-tight text-white">
+            
+            <h1 class="reveal-slide-up stagger-1 text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-tight text-white">
                 1:1 Email Receipts.<br><span class="text-gradient">Zero effort.</span>
             </h1>
-            <p class="reveal-up delay-200 text-base sm:text-lg md:text-xl text-zinc-500 mb-10 max-w-2xl mx-auto font-light px-2">
-                The most advanced receipt generator. 1:1 receipt structure, exact email client rendering, ultimate accuracy for premium brands.
+            
+            <p class="reveal-slide-up stagger-2 text-base sm:text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto font-light px-2 leading-relaxed">
+                The most advanced receipt generator on the market. 1:1 receipt structure, exact email client rendering, ultimate accuracy for premium brands.
             </p>
-            <div class="reveal-up delay-300 flex flex-col sm:flex-row justify-center gap-4 px-4 sm:px-0">
-                <a href="#pricing" class="w-full sm:w-auto px-8 py-4 bg-white text-black rounded-lg font-bold hover:bg-zinc-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+            
+            <div class="reveal-slide-up stagger-3 flex flex-col sm:flex-row justify-center gap-4 px-4 sm:px-0">
+                <a href="#pricing" class="w-full sm:w-auto px-8 py-4 bg-white text-black rounded-xl font-bold text-lg hover:bg-zinc-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                     Purchase Access
                 </a>
-                <a href="#receipts-section" class="w-full sm:w-auto px-8 py-4 border border-white/20 rounded-lg font-medium text-white hover:bg-white/5 transition-colors flex items-center justify-center">
+                <a href="#receipts-section" class="w-full sm:w-auto px-8 py-4 border border-white/20 rounded-xl font-bold text-lg text-white hover:bg-white/10 transition-colors flex items-center justify-center backdrop-blur-sm">
                     Explore Receipts
                 </a>
                 
-                <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="w-full sm:w-auto px-8 py-4 bg-[#5865F2]/10 border border-[#5865F2]/30 text-[#5865F2] rounded-lg font-bold hover:bg-[#5865F2]/20 transition-colors flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
+                <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="w-full sm:w-auto px-8 py-4 bg-[#5865F2]/10 border border-[#5865F2]/30 text-[#5865F2] rounded-xl font-bold text-lg hover:bg-[#5865F2]/20 transition-all flex items-center justify-center gap-2">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
                     Join Discord
                 </a>
             </div>
         </section>
 
-        <section id="how-it-works" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-            <div class="reveal-scale text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">How it works.</h2>
-                <p class="text-zinc-500">From login to your perfect digital receipt in 3 steps.</p>
+        <section id="how-it-works" class="max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-32 border-t border-white/5 relative">
+            <div class="reveal-zoom text-center mb-16 md:mb-24">
+                <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">How it works.</h2>
+                <p class="text-zinc-500 text-lg md:text-xl font-medium">From login to your perfect digital receipt in 3 steps.</p>
             </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 relative">
-                <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
-                <div class="reveal-up delay-100 text-center z-10">
-                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-black border border-white/10 rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)]">1</div>
-                    <h3 class="text-xl font-bold mb-2">Connect</h3>
-                    <p class="text-zinc-400 text-sm px-4 md:px-0">Log in securely using your Discord account to link your profile to our dashboard.</p>
+                <div class="reveal-slide-up stagger-1 text-center z-10 bg-black/40 p-8 rounded-3xl border border-white/5 backdrop-blur-sm">
+                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-black border-2 border-white/20 rounded-full flex items-center justify-center text-3xl font-black mb-8 shadow-[0_0_30px_rgba(255,255,255,0.05)] text-white">1</div>
+                    <h3 class="text-2xl font-bold mb-4">Connect</h3>
+                    <p class="text-zinc-400 text-base leading-relaxed">Log in securely using your Discord account to link your profile to our advanced dashboard.</p>
                 </div>
-                <div class="reveal-up delay-200 text-center z-10">
-                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-black border border-white/10 rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)]">2</div>
-                    <h3 class="text-xl font-bold mb-2">Purchase</h3>
-                    <p class="text-zinc-400 text-sm px-4 md:px-0">Buy access directly on the website to receive your unique activation key or role.</p>
+                
+                <div class="reveal-slide-up stagger-2 text-center z-10 bg-black/40 p-8 rounded-3xl border border-white/5 backdrop-blur-sm">
+                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-black border-2 border-white/20 rounded-full flex items-center justify-center text-3xl font-black mb-8 shadow-[0_0_30px_rgba(255,255,255,0.05)] text-white">2</div>
+                    <h3 class="text-2xl font-bold mb-4">Purchase</h3>
+                    <p class="text-zinc-400 text-base leading-relaxed">Buy access directly on the website to instantly receive your unique activation key and Discord role.</p>
                 </div>
-                <div class="reveal-up delay-300 text-center z-10">
-                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-white text-black rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.2)]">3</div>
-                    <h3 class="text-xl font-bold mb-2">Generate</h3>
-                    <p class="text-zinc-400 text-sm px-4 md:px-0">Use our web dashboard or Discord bot to configure your details, and receive the email instantly.</p>
+                
+                <div class="reveal-slide-up stagger-3 text-center z-10 bg-gradient-to-b from-white/10 to-transparent p-8 rounded-3xl border border-white/20 backdrop-blur-sm shadow-[0_10px_50px_rgba(255,255,255,0.05)]">
+                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-white text-black border-2 border-white rounded-full flex items-center justify-center text-3xl font-black mb-8 shadow-[0_0_30px_rgba(255,255,255,0.3)]">3</div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">Generate</h3>
+                    <p class="text-zinc-300 text-base leading-relaxed">Use our web dashboard or Discord bot to configure your details. Receive the perfect email instantly.</p>
                 </div>
             </div>
         </section>
 
-        <section id="receipts-section" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-            <div class="reveal-left mb-12 text-center md:text-left">
-                <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Select Region.</h2>
-                <p class="text-zinc-500 mt-2">Browse our perfectly matched email categories.</p>
+        <section id="receipts-section" class="max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-32 border-t border-white/5 relative">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#5865F2]/5 to-transparent z-[-1] rounded-[100px] blur-3xl opacity-50"></div>
+            
+            <div class="reveal-slide-left mb-12 md:mb-20 text-center md:text-left">
+                <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight">Select Region.</h2>
+                <p class="text-zinc-400 text-lg md:text-xl mt-4 font-medium">Browse our perfectly matched email categories tailored for specific markets.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div onclick="openModal('Hungarian')" class="reveal-up delay-100 glass-card glass-card-hover rounded-2xl p-8 md:p-10 cursor-pointer group relative overflow-hidden min-h-[350px] md:min-h-[400px] flex flex-col justify-end">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
-                    <div class="absolute top-0 right-0 p-8 text-zinc-800 transition-transform duration-700 group-hover:scale-110 group-hover:text-zinc-700">
-                        <svg class="w-32 h-32 md:w-48 md:h-48 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                <div onclick="openModal('Hungarian')" class="reveal-zoom stagger-1 glass-card glass-card-hover rounded-[2.5rem] p-8 md:p-12 cursor-pointer group relative overflow-hidden min-h-[400px] md:min-h-[500px] flex flex-col justify-end shadow-2xl">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10"></div>
+                    <div class="absolute top-0 right-0 p-8 md:p-12 text-zinc-800 transition-transform duration-1000 group-hover:scale-125 group-hover:rotate-12 group-hover:text-zinc-700">
+                        <svg class="w-48 h-48 md:w-64 md:h-64 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <div class="relative z-20">
-                        <h3 class="text-3xl md:text-4xl font-black mb-3 text-white">Hungarian</h3>
-                        <p class="text-zinc-300 text-xs md:text-sm max-w-sm leading-relaxed">Domestic formats featuring top local streetwear & sneaker hubs. Perfectly formatted digital order confirmations.</p>
-                        <div class="mt-6 md:mt-8 flex items-center text-xs md:text-sm font-bold text-white uppercase tracking-wider bg-white/10 w-fit px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-black transition-colors">
-                            Explore Receipts <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                    <div class="relative z-20 transform transition-transform duration-500 group-hover:translate-y-[-10px]">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded-full text-xs font-bold uppercase tracking-widest">Local Brands</span>
+                        </div>
+                        <h3 class="text-4xl md:text-5xl font-black mb-4 text-white">Hungarian</h3>
+                        <p class="text-zinc-300 text-sm md:text-base max-w-md leading-relaxed font-light">Domestic formats featuring top local streetwear & sneaker hubs. Perfectly formatted digital order confirmations for the Hungarian market.</p>
+                        <div class="mt-8 flex items-center text-sm md:text-base font-bold text-white uppercase tracking-widest bg-white/10 border border-white/20 w-fit px-6 py-3 rounded-xl group-hover:bg-white group-hover:text-black transition-all shadow-[0_0_20px_rgba(255,255,255,0.0)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                            Explore Templates <span class="ml-2 transition-transform duration-300 group-hover:translate-x-2">→</span>
                         </div>
                     </div>
                 </div>
 
-                <div onclick="openModal('International')" class="reveal-up delay-200 glass-card glass-card-hover rounded-2xl p-8 md:p-10 cursor-pointer group relative overflow-hidden min-h-[350px] md:min-h-[400px] flex flex-col justify-end">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
-                    <div class="absolute top-0 right-0 p-8 text-zinc-800 transition-transform duration-700 group-hover:scale-110 group-hover:text-zinc-700">
-                        <svg class="w-32 h-32 md:w-48 md:h-48 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.25 12h17.5M12 3.25v17.5M12 3.25a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 3.25c2.5 0 5.5 3.5 5.5 8.75s-3 8.75-5.5 8.75-5.5-3.5-5.5-8.75 3-8.75 5.5-8.75Z"></path></svg>
+                <div onclick="openModal('International')" class="reveal-zoom stagger-2 glass-card glass-card-hover rounded-[2.5rem] p-8 md:p-12 cursor-pointer group relative overflow-hidden min-h-[400px] md:min-h-[500px] flex flex-col justify-end shadow-2xl">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10"></div>
+                    <div class="absolute top-0 right-0 p-8 md:p-12 text-zinc-800 transition-transform duration-1000 group-hover:scale-125 group-hover:rotate-12 group-hover:text-zinc-700">
+                        <svg class="w-48 h-48 md:w-64 md:h-64 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.25 12h17.5M12 3.25v17.5M12 3.25a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 3.25c2.5 0 5.5 3.5 5.5 8.75s-3 8.75-5.5 8.75-5.5-3.5-5.5-8.75 3-8.75 5.5-8.75Z"></path></svg>
                     </div>
-                    <div class="relative z-20">
-                        <h3 class="text-3xl md:text-4xl font-black mb-3 text-white">International</h3>
-                        <p class="text-zinc-300 text-xs md:text-sm max-w-sm leading-relaxed">Global brands and exact replicas of worldwide shipping emails. From luxury fashion houses to major verified marketplaces.</p>
-                        <div class="mt-6 md:mt-8 flex items-center text-xs md:text-sm font-bold text-white uppercase tracking-wider bg-white/10 w-fit px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-black transition-colors">
-                            Explore Receipts <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                    <div class="relative z-20 transform transition-transform duration-500 group-hover:translate-y-[-10px]">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full text-xs font-bold uppercase tracking-widest">Global Brands</span>
+                        </div>
+                        <h3 class="text-4xl md:text-5xl font-black mb-4 text-white">International</h3>
+                        <p class="text-zinc-300 text-sm md:text-base max-w-md leading-relaxed font-light">Global luxury brands and exact replicas of worldwide shipping emails. From high-end fashion houses to major verified streetwear marketplaces.</p>
+                        <div class="mt-8 flex items-center text-sm md:text-base font-bold text-white uppercase tracking-widest bg-white/10 border border-white/20 w-fit px-6 py-3 rounded-xl group-hover:bg-white group-hover:text-black transition-all shadow-[0_0_20px_rgba(255,255,255,0.0)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                            Explore Templates <span class="ml-2 transition-transform duration-300 group-hover:translate-x-2">→</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="pricing" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-            <div class="reveal-scale text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">Choose Your Access.</h2>
-                <p class="text-zinc-500">Secure your license. Instant Discord role assignment after purchase.</p>
+        <section id="pricing" class="max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-32 border-t border-white/5 relative">
+            <div class="reveal-slide-up text-center mb-16 md:mb-24">
+                <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">Choose Your Access.</h2>
+                <p class="text-zinc-400 text-lg md:text-xl font-medium">Secure your license today. Instant Discord role assignment after successful purchase.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="reveal-left delay-100 glass-card rounded-2xl p-8 flex flex-col relative">
-                    <h3 class="text-2xl font-bold mb-2">Resell Access</h3>
-                    <p class="text-zinc-400 text-sm mb-6">Gain access to our exclusive resell course and community.</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-black text-white">$7.99</span>
-                        <span class="text-zinc-500">/ 30 Days</span>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                <div class="reveal-slide-right stagger-1 glass-card rounded-[2rem] p-8 md:p-10 flex flex-col relative border border-white/10 hover:border-white/30">
+                    <h3 class="text-3xl font-black mb-3">Resell Access</h3>
+                    <p class="text-zinc-400 text-sm md:text-base mb-8 leading-relaxed">Gain access to our exclusive resell course and professional trading community.</p>
+                    <div class="mb-8 pb-8 border-b border-white/10">
+                        <span class="text-5xl font-black text-white">$7.99</span>
+                        <span class="text-zinc-500 font-bold ml-2">/ 30 Days</span>
                     </div>
-                    <ul class="space-y-4 mb-8 text-sm text-zinc-300 flex-grow">
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Complete Resell Course</li>
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Private Discord Channels</li>
-                        <li class="flex items-center gap-3 text-zinc-600"><svg class="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> <span class="line-through">Receipt Generation</span></li>
+                    <ul class="space-y-5 mb-10 text-sm md:text-base text-zinc-300 flex-grow font-medium">
+                        <li class="flex items-start gap-4"><svg class="w-6 h-6 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Complete Resell Course</li>
+                        <li class="flex items-start gap-4"><svg class="w-6 h-6 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Private Discord Channels</li>
+                        <li class="flex items-start gap-4 text-zinc-600"><svg class="w-6 h-6 text-zinc-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> <span class="line-through">Receipt Generation</span></li>
                     </ul>
-                    <button onclick="buyPlan('resell')" class="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors">Purchase via Whop</button>
+                    <button onclick="buyPlan('resell')" class="w-full py-4 bg-white/5 hover:bg-white/15 border border-white/10 text-white rounded-xl font-bold text-lg transition-all active:scale-95">Purchase via Whop</button>
                 </div>
 
-                <div class="reveal-up delay-200 glass-card rounded-2xl p-8 flex flex-col relative border-white/30 transform md:-translate-y-4 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase">Most Popular</div>
-                    <h3 class="text-2xl font-bold mb-2">Receipt Access</h3>
-                    <p class="text-zinc-400 text-sm mb-6">The ultimate experience with Web Dashboard & Bot access.</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-black text-white">$14.99</span>
-                        <span class="text-zinc-500">/ 30 Days</span>
+                <div class="reveal-slide-up stagger-2 glass-card rounded-[2rem] p-8 md:p-10 flex flex-col relative border-2 border-white/30 transform md:-translate-y-6 shadow-[0_20px_50px_rgba(255,255,255,0.1)] bg-gradient-to-b from-white/5 to-transparent">
+                    <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-2 rounded-full text-xs md:text-sm font-black tracking-widest uppercase shadow-[0_0_20px_rgba(255,255,255,0.4)]">Most Popular</div>
+                    <h3 class="text-3xl font-black mb-3">Receipt Access</h3>
+                    <p class="text-zinc-400 text-sm md:text-base mb-8 leading-relaxed">The ultimate generator experience with unrestricted Web Dashboard & Discord Bot access.</p>
+                    <div class="mb-8 pb-8 border-b border-white/10">
+                        <span class="text-5xl font-black text-white">$14.99</span>
+                        <span class="text-zinc-500 font-bold ml-2">/ 30 Days</span>
                     </div>
-                    <ul class="space-y-4 mb-8 text-sm text-zinc-300 flex-grow">
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Access to ALL templates</li>
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Web Panel + Bot Generation</li>
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Receipt Access Role</li>
+                    <ul class="space-y-5 mb-10 text-sm md:text-base text-white flex-grow font-bold">
+                        <li class="flex items-start gap-4"><svg class="w-6 h-6 text-white shrink-0 mt-0.5 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Access to ALL templates</li>
+                        <li class="flex items-start gap-4"><svg class="w-6 h-6 text-white shrink-0 mt-0.5 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Web Panel + Bot Generation</li>
+                        <li class="flex items-start gap-4"><svg class="w-6 h-6 text-white shrink-0 mt-0.5 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Instant Receipt Access Role</li>
                     </ul>
-                    <button onclick="buyPlan('receipt')" class="w-full py-3 bg-white text-black rounded-lg font-bold hover:bg-zinc-200 transition-colors">Purchase via Whop</button>
+                    <button onclick="buyPlan('receipt')" class="w-full py-4 bg-white text-black rounded-xl font-black text-lg hover:bg-zinc-200 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-all active:scale-95">Purchase via Whop</button>
                 </div>
 
-                <div class="reveal-right delay-300 glass-card rounded-2xl p-8 flex flex-col relative">
-                    <h3 class="text-2xl font-bold mb-2 text-amber-400">Premium Access</h3>
-                    <p class="text-zinc-400 text-sm mb-6">The all-in-one package. Resell course + Receipt generation.</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-black text-white">$22.99</span>
-                        <span class="text-zinc-500">/ 30 Days</span>
+                <div class="reveal-slide-left stagger-3 glass-card rounded-[2rem] p-8 md:p-10 flex flex-col relative border border-amber-500/30 bg-gradient-to-b from-amber-500/5 to-transparent">
+                    <h3 class="text-3xl font-black mb-3 text-amber-400">Premium Access</h3>
+                    <p class="text-zinc-400 text-sm md:text-base mb-8 leading-relaxed">The all-in-one elite package. Professional Resell course combined with Receipt generation.</p>
+                    <div class="mb-8 pb-8 border-b border-white/10">
+                        <span class="text-5xl font-black text-white">$22.99</span>
+                        <span class="text-zinc-500 font-bold ml-2">/ 30 Days</span>
                     </div>
-                    <ul class="space-y-4 mb-8 text-sm text-zinc-300 flex-grow">
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Everything in Receipt Access</li>
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Everything in Resell Access</li>
-                        <li class="flex items-center gap-3"><svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Premium Discord Role</li>
+                    <ul class="space-y-5 mb-10 text-sm md:text-base text-zinc-300 flex-grow font-medium">
+                        <li class="flex items-start gap-4"><svg class="w-6 h-6 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Everything in Receipt Access</li>
+                        <li class="flex items-start gap-4"><svg class="w-6 h-6 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Everything in Resell Access</li>
+                        <li class="flex items-start gap-4"><svg class="w-6 h-6 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Exclusive Premium Discord Role</li>
                     </ul>
-                    <button onclick="buyPlan('premium')" class="w-full py-3 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 rounded-lg font-bold transition-colors">Purchase via Whop</button>
+                    <button onclick="buyPlan('premium')" class="w-full py-4 bg-amber-500 text-black hover:bg-amber-400 rounded-xl font-black text-lg transition-all active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)]">Purchase via Whop</button>
                 </div>
             </div>
         </section>
         
-        <footer class="border-t border-white/10 py-12 text-center relative z-10 bg-black">
-            <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="text-xl font-extrabold tracking-tighter text-white opacity-50">receipt.er</div>
-                <p class="text-zinc-600 text-sm font-medium tracking-wide">&copy; 2026. ENGINEERED FOR PERFECTION.</p>
+        <footer class="border-t border-white/10 py-12 md:py-16 text-center relative z-10 bg-black/80 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-2xl font-extrabold tracking-tighter text-white opacity-40 hover:opacity-100 transition-opacity cursor-default">receipt.er</div>
+                <div class="flex gap-6">
+                    <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="text-zinc-500 hover:text-white transition-colors">Discord</a>
+                    <a href="#" class="text-zinc-500 hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="text-zinc-500 hover:text-white transition-colors">Privacy Policy</a>
+                </div>
+                <p class="text-zinc-600 text-xs md:text-sm font-medium tracking-widest">&copy; 2026. ENGINEERED FOR PERFECTION.</p>
             </div>
         </footer>
     </main>
 
-    <div id="receiptModal" class="modal-base fixed inset-0 z-50 bg-black/95 backdrop-blur-xl hidden-modal flex flex-col">
-        <div class="h-20 border-b border-white/10 px-4 md:px-6 flex justify-between items-center bg-black/50">
-            <button onclick="closeModal('receiptModal')" class="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-xs md:text-sm group">
-                <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back
+    <div id="receiptModal" class="modal-base fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl hidden-modal flex flex-col">
+        <div class="h-20 border-b border-white/10 px-4 md:px-8 flex justify-between items-center bg-black/60 shadow-lg">
+            <button onclick="closeModal('receiptModal')" class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all font-bold text-sm group">
+                <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Dashboard
             </button>
-            <h2 id="modalTitle" class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Loading...</h2>
+            <h2 id="modalTitle" class="text-xl md:text-2xl font-black tracking-tight text-white uppercase bg-white/5 px-6 py-2 rounded-full border border-white/10">Loading...</h2>
         </div>
-        <div class="flex-grow p-4 md:p-8 overflow-y-auto">
-            <div id="modalContent" class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"></div>
+        <div class="flex-grow p-4 md:p-10 overflow-y-auto">
+            <div id="modalContent" class="max-w-screen-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"></div>
         </div>
     </div>
 
-    <div id="generatorModal" class="modal-base fixed inset-0 z-[60] bg-black/95 backdrop-blur-xl hidden-modal flex flex-col">
-        <div class="h-20 border-b border-white/10 px-4 md:px-6 flex justify-between items-center bg-black/50">
-            <button onclick="closeGenerator()" class="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-xs md:text-sm group">
-                <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Templates
+    <div id="generatorModal" class="modal-base fixed inset-0 z-[60] bg-black/95 backdrop-blur-2xl hidden-modal flex flex-col">
+        <div class="h-20 border-b border-white/10 px-4 md:px-8 flex justify-between items-center bg-black/60 shadow-lg">
+            <button onclick="closeGenerator()" class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all font-bold text-sm group">
+                <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Change Template
             </button>
-            <h2 id="generatorTitle" class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Generate Receipt</h2>
+            <h2 id="generatorTitle" class="text-xl md:text-2xl font-black tracking-tight text-white uppercase bg-[#5865F2]/20 text-[#5865F2] px-6 py-2 rounded-full border border-[#5865F2]/30">Generate Receipt</h2>
         </div>
 
-        <div class="flex-grow p-4 md:p-8 overflow-y-auto flex justify-center items-start">
-            <div class="glass-card rounded-2xl w-full max-w-3xl p-6 md:p-8 animate-[fadeIn_0.3s_ease-out_forwards]">
-                <div class="mb-6 md:mb-8 border-b border-white/10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+        <div class="flex-grow p-4 md:p-10 overflow-y-auto flex justify-center items-start">
+            <div class="glass-card rounded-[2rem] w-full max-w-4xl p-6 md:p-10 animate-[fadeIn_0.4s_ease-out_forwards] border border-white/20 shadow-2xl">
+                
+                <div class="mb-8 md:mb-10 border-b border-white/10 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <h3 class="text-xl md:text-2xl font-bold" id="generatorBrandName">Brand Name</h3>
-                        <p class="text-zinc-400 text-xs md:text-sm mt-1">Variables auto-detected from HTML. Your address, dates, and calculated fields are applied securely in the background.</p>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+                            <span class="text-green-500 font-bold text-xs uppercase tracking-widest">Compiler Ready</span>
+                        </div>
+                        <h3 class="text-3xl md:text-4xl font-black text-white" id="generatorBrandName">Brand Name</h3>
+                        <p class="text-zinc-400 text-sm md:text-base mt-3 leading-relaxed max-w-2xl">Smart variables auto-detected from the HTML template. Your pre-configured address, dates, and highly-advanced calculated math fields are applied securely in the background.</p>
                     </div>
                 </div>
-                <form id="generatorForm" class="space-y-6" onsubmit="event.preventDefault(); submitGeneration();">
+                
+                <form id="generatorForm" class="space-y-8" onsubmit="event.preventDefault(); submitGeneration();">
                     <div id="hiddenInputsBox" class="hidden"></div>
-                    <div id="dynamicInputs" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"></div>
                     
-                    <div id="totalPriceBox" class="hidden mt-6 bg-green-900/20 border border-green-500/30 p-4 md:p-6 rounded-lg flex justify-between items-center">
-                        <span class="text-green-400 font-bold tracking-wider uppercase text-xs md:text-sm">Calculated Total</span>
-                        <span id="liveTotalDisplay" class="text-2xl md:text-3xl font-black text-white">$0.00</span>
+                    <div id="dynamicInputs" class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"></div>
+                    
+                    <div id="totalPriceBox" class="hidden mt-10 bg-gradient-to-r from-green-900/40 to-green-800/20 border border-green-500/50 p-6 md:p-8 rounded-2xl flex justify-between items-center shadow-[0_0_30px_rgba(34,197,94,0.1)]">
+                        <div class="flex flex-col">
+                            <span class="text-green-400 font-black tracking-widest uppercase text-xs md:text-sm mb-1">Calculated Total Price</span>
+                            <span class="text-green-500/70 text-xs font-medium">Includes shipping, processing and taxes.</span>
+                        </div>
+                        <span id="liveTotalDisplay" class="text-3xl md:text-5xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">$0.00</span>
                     </div>
 
-                    <div class="pt-6 mt-8 border-t border-white/10 flex flex-col md:flex-row justify-end items-center gap-4">
-                        <div id="sendStatus" class="text-sm font-bold text-green-400 hidden">✅ Sent to Discord Bot!</div>
-                        <button id="submitBtn" type="submit" class="w-full md:w-auto bg-white text-black px-8 py-3 rounded-lg font-bold hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                            Generate & Send Email
+                    <div class="pt-8 mt-10 border-t border-white/10 flex flex-col md:flex-row justify-end items-center gap-6">
+                        <div id="sendStatus" class="text-base font-bold text-green-400 hidden bg-green-500/10 px-4 py-2 rounded-lg border border-green-500/20 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Successfully sent to Discord Bot!
+                        </div>
+                        <button id="submitBtn" type="submit" class="w-full md:w-auto bg-white text-black px-10 py-4 rounded-xl font-black text-lg hover:bg-zinc-200 transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.6)] flex items-center justify-center gap-3 active:scale-95">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            Compile & Send Email
                         </button>
                     </div>
                 </form>
@@ -342,43 +490,79 @@
         </div>
     </div>
 
-    <div id="settingsModal" class="modal-base fixed inset-0 z-[70] bg-black/95 backdrop-blur-xl hidden-modal flex flex-col">
-        <div class="h-20 border-b border-white/10 px-4 md:px-6 flex justify-between items-center bg-black/50">
-            <button onclick="closeSettings()" class="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-xs md:text-sm group">
-                <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Close
+    <div id="settingsModal" class="modal-base fixed inset-0 z-[70] bg-black/95 backdrop-blur-2xl hidden-modal flex flex-col">
+        <div class="h-20 border-b border-white/10 px-4 md:px-8 flex justify-between items-center bg-black/60 shadow-lg">
+            <button onclick="closeSettings()" class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all font-bold text-sm group">
+                <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Close Settings
             </button>
-            <h2 class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Profile Settings</h2>
+            <h2 class="text-xl md:text-2xl font-black tracking-tight text-white uppercase bg-zinc-800 px-6 py-2 rounded-full border border-white/10">Profile Configuration</h2>
         </div>
-        <div class="flex-grow p-4 md:p-8 overflow-y-auto flex justify-center items-start">
-            <div class="glass-card rounded-2xl w-full max-w-2xl p-6 md:p-8 animate-[fadeIn_0.3s_ease-out_forwards]">
-                <div class="mb-6 border-b border-white/10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+        
+        <div class="flex-grow p-4 md:p-10 overflow-y-auto flex justify-center items-start">
+            <div class="glass-card rounded-[2rem] w-full max-w-3xl p-6 md:p-10 animate-[fadeIn_0.4s_ease-out_forwards] border border-white/20 shadow-2xl">
+                
+                <div class="mb-8 border-b border-white/10 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                     <div>
-                        <h3 class="text-xl md:text-2xl font-bold">Global Configuration</h3>
-                        <p class="text-zinc-400 text-xs md:text-sm mt-1">Required background data for receipt generation.</p>
+                        <h3 class="text-2xl md:text-3xl font-black text-white">Global Background Data</h3>
+                        <p class="text-zinc-400 text-sm md:text-base mt-2 leading-relaxed">This data is required for receipt generation. The bot will automatically inject your name and address into the templates to save you time.</p>
                     </div>
-                    <div class="flex gap-2 w-full md:w-auto">
-                        <button type="button" onclick="generateSettingsAddress('US')" class="flex-1 md:flex-none px-3 py-2 md:py-1.5 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded text-xs font-bold transition-colors">Random US</button>
-                        <button type="button" onclick="generateSettingsAddress('HU')" class="flex-1 md:flex-none px-3 py-2 md:py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded text-xs font-bold transition-colors">Random HU</button>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <button type="button" onclick="generateSettingsAddress('US')" class="flex-1 md:flex-none px-4 py-3 md:py-2 bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
+                            🇺🇸 Auto-Fill US
+                        </button>
+                        <button type="button" onclick="generateSettingsAddress('HU')" class="flex-1 md:flex-none px-4 py-3 md:py-2 bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
+                            🇭🇺 Auto-Fill HU
+                        </button>
                     </div>
                 </div>
-                <form id="settingsForm" class="space-y-4" onsubmit="event.preventDefault(); saveSettings();">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-bold text-white mb-2 uppercase">Delivery Email *</label><input type="email" id="set_email" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
-                        <div><label class="block text-xs font-bold text-white mb-2 uppercase">Full Name *</label><input type="text" id="set_name" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
+                
+                <form id="settingsForm" class="space-y-6 md:space-y-8" onsubmit="event.preventDefault(); saveSettings();">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                        <div>
+                            <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">Delivery Email Address *</label>
+                            <input type="email" id="set_email" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="where.to.send@gmail.com">
+                        </div>
+                        <div>
+                            <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">Full Customer Name *</label>
+                            <input type="text" id="set_name" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="John Doe">
+                        </div>
                     </div>
-                    <div><label class="block text-xs font-bold text-white mb-2 uppercase">Street / Address *</label><input type="text" id="set_street" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="md:col-span-1"><label class="block text-xs font-bold text-white mb-2 uppercase">City *</label><input type="text" id="set_city" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
-                        <div class="md:col-span-1"><label class="block text-xs font-bold text-white mb-2 uppercase">Postal Code *</label><input type="text" id="set_postal" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
-                        <div class="md:col-span-1"><label class="block text-xs font-bold text-white mb-2 uppercase">Country *</label><input type="text" id="set_country" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
-                        <div class="md:col-span-1"><label class="block text-xs font-bold text-white mb-2 uppercase text-amber-400">Card Last 4 *</label><input type="text" id="set_card" required maxlength="4" pattern="[0-9]{4}" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-zinc-600" placeholder="e.g. 4921"></div>
+                    <div>
+                        <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">Street / Address Line *</label>
+                        <input type="text" id="set_street" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="123 Hypebeast Street, Apt 4B">
                     </div>
                     
-                    <div id="settingsAlert" class="hidden text-green-400 text-sm font-bold text-center mt-4">Settings saved successfully!</div>
-                    <div class="pt-4 mt-6 border-t border-white/10 flex justify-end">
-                        <button type="submit" class="w-full md:w-auto bg-white text-black px-6 py-3 md:py-2 rounded-lg font-bold hover:bg-zinc-200 transition-colors">Save Settings</button>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">City *</label>
+                            <input type="text" id="set_city" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="Los Angeles">
+                        </div>
+                        <div class="col-span-1 md:col-span-1">
+                            <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">ZIP / Postal *</label>
+                            <input type="text" id="set_postal" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="90001">
+                        </div>
+                        <div class="col-span-1 md:col-span-1">
+                            <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">Country *</label>
+                            <input type="text" id="set_country" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="USA">
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-xs md:text-sm font-black text-amber-400 mb-2 uppercase tracking-widest drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]">Card Last 4 *</label>
+                            <input type="text" id="set_card" required maxlength="4" pattern="[0-9]{4}" class="w-full bg-black/60 border border-amber-500/30 rounded-xl px-5 py-4 text-white font-bold focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all outline-none placeholder-zinc-600 text-center tracking-[0.3em]" placeholder="4921">
+                        </div>
+                    </div>
+                    
+                    <div id="settingsAlert" class="hidden text-green-400 text-sm font-bold text-center mt-6 bg-green-500/10 border border-green-500/20 py-3 rounded-xl">
+                        ✅ Settings successfully saved and encrypted in your local browser!
+                    </div>
+                    
+                    <div class="pt-6 mt-8 border-t border-white/10 flex justify-end">
+                        <button type="submit" class="w-full md:w-auto bg-white text-black px-10 py-4 rounded-xl font-black text-lg hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                            Save Configuration
+                        </button>
                     </div>
                 </form>
             </div>
@@ -386,37 +570,59 @@
     </div>
 
     <div id="customAlertModal" class="modal-base fixed inset-0 z-[100] bg-black/90 backdrop-blur-md hidden-modal flex items-center justify-center p-4">
-        <div class="glass-card rounded-2xl w-full max-w-md p-8 text-center animate-[fadeIn_0.3s_ease-out_forwards] border border-white/20 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
-            <div class="w-16 h-16 mx-auto bg-white/10 rounded-full flex items-center justify-center mb-6 border border-white/20">
-                <svg id="alertIcon" class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div class="glass-card rounded-[2rem] w-full max-w-md p-10 text-center animate-[fadeIn_0.3s_ease-out_forwards] border border-white/20 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+            <div class="w-20 h-20 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/10">
+                <svg id="alertIcon" class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
-            <h3 id="alertTitle" class="text-2xl font-bold text-white mb-2 tracking-tight">Notice</h3>
-            <p id="alertMessage" class="text-zinc-400 text-sm mb-8 leading-relaxed">Message goes here.</p>
-            <button id="alertBtn" class="w-full py-3 bg-white text-black rounded-lg font-bold hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95">
-                OK
+            <h3 id="alertTitle" class="text-3xl font-black text-white mb-4 tracking-tight">Notice</h3>
+            <p id="alertMessage" class="text-zinc-400 text-base mb-10 leading-relaxed font-medium">System message will appear here.</p>
+            <button id="alertBtn" class="w-full py-4 bg-white text-black rounded-xl font-black text-lg hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95">
+                Acknowledge
             </button>
         </div>
     </div>
 
     <script>
+        // Az útvonal, ahol a Python aiohttp szerver fut
         const API_BASE_URL = "/bot-api";
 
         let currentUser = null; 
         let userPlan = "None";
         let sessionToken = localStorage.getItem('sessionToken') || null;
 
-        // Mobil Menü Nyitó/Záró Funkció
+        // MOBIL MENÜ HAMBURGER LOGIKA
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
-            if(menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                menu.classList.add('flex');
+            const hamburger = document.getElementById('hamburgerIcon');
+            const closeBtn = document.getElementById('closeIcon');
+            const toggleBtn = document.getElementById('mobileMenuToggleBtn');
+            
+            if(menu.classList.contains('mobile-menu-hidden')) {
+                // Menü kinyitása
+                menu.classList.remove('mobile-menu-hidden');
+                menu.classList.add('mobile-menu-active');
+                hamburger.classList.add('hidden');
+                hamburger.classList.remove('block');
+                closeBtn.classList.remove('hidden');
+                closeBtn.classList.add('block');
+                toggleBtn.classList.add('bg-white/20');
+                toggleBtn.classList.add('text-white');
+                document.body.style.overflow = 'hidden'; // Ne lehessen görgetni alatta
             } else {
-                menu.classList.add('hidden');
-                menu.classList.remove('flex');
+                // Menü bezárása
+                menu.classList.add('mobile-menu-hidden');
+                menu.classList.remove('mobile-menu-active');
+                hamburger.classList.remove('hidden');
+                hamburger.classList.add('block');
+                closeBtn.classList.add('hidden');
+                closeBtn.classList.remove('block');
+                toggleBtn.classList.remove('bg-white/20');
+                toggleBtn.classList.remove('text-white');
+                document.body.style.overflow = 'auto'; // Újra lehessen görgetni
             }
         }
 
+        // PROFESSZIONÁLIS ALERT RENDSZER
         function showCustomAlert(title, message, btnText = "OK", callback = null, isError = false) {
             const modal = document.getElementById('customAlertModal');
             document.getElementById('alertTitle').textContent = title;
@@ -426,14 +632,22 @@
             btn.textContent = btnText;
             
             const icon = document.getElementById('alertIcon');
+            const iconContainer = icon.parentElement;
+            
             if (isError) {
+                // Piros hiba ikon
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>';
-                icon.classList.add('text-red-400');
+                icon.classList.add('text-red-500');
                 icon.classList.remove('text-white');
+                iconContainer.classList.add('border-red-500/30', 'bg-red-500/10');
+                iconContainer.classList.remove('border-white/10', 'bg-white/5');
             } else {
+                // Sima fehér info ikon
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
-                icon.classList.remove('text-red-400');
+                icon.classList.remove('text-red-500');
                 icon.classList.add('text-white');
+                iconContainer.classList.remove('border-red-500/30', 'bg-red-500/10');
+                iconContainer.classList.add('border-white/10', 'bg-white/5');
             }
 
             btn.onclick = () => {
@@ -446,24 +660,40 @@
             modal.classList.add('active-modal');
         }
 
-        // Kiterjesztett Reveal Animáció Motor
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal, .reveal-up, .reveal-left, .reveal-right, .reveal-scale");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                // Kisebb threshold, hogy mobilon is könnyen aktiválódjon
-                if (elementTop < windowHeight - 50) { reveals[i].classList.add("active"); }
-            }
-        }
-        window.addEventListener("scroll", reveal);
-        // Késleltetett első futtatás, hogy a betöltési animációk is végbemenjenek
-        setTimeout(reveal, 100);
+        // ==========================================================================
+        // INTERSECTION OBSERVER ANIMÁCIÓS MOTOR (Nagyon sima, mobilra optimalizált)
+        // ==========================================================================
+        document.addEventListener("DOMContentLoaded", () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 // Amikor az elem 15%-a látszódik, indul az animáció
+            };
 
-        // A képeket (image kulcsot) KIVETTEM a listából, hogy automatikusan generáljuk őket!
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        // Miután megjelent, levehetjük a figyelést, hogy ne terhelje a gépet
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            // Kiválasztjuk az összes animálni kívánt elemet
+            const revealElements = document.querySelectorAll('.reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom');
+            revealElements.forEach(el => observer.observe(el));
+        });
+
+        // ==========================================================================
+        // ADATBÁZIS: A sablonok és tulajdonságaik
+        // ==========================================================================
+        // FONTOS: A "kép" (image) attribútumot direkt kivettem, mert a kód lenn 
+        // automatikusan a GitHub Repóból generálja a linkeket a fájlnevek alapján!
+        
         const receiptData = {
             Hungarian: [
-                { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", image: "robloxcsiter-blip/zocsegwebsite/tree/main/images/balazskicks.png", file: "BalazsKICKS.html" },
+                { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", file: "BalazsKICKS.html" },
                 { name: "OnSize", status: "Verified", tag: "Sneaker", file: "OnSize.html" },
                 { name: "Footshop HU", status: "Verified", tag: "Sneaker", file: "FootshopHU.html" },
                 { name: "Nike HU", status: "Verified", tag: "Sportswear", file: "NikeHU.html" },
@@ -487,17 +717,22 @@
             ]
         };
 
+        // Rendezési logika a sablonokhoz
         const sortOrder = { "Luxury": 1, "Premium": 2, "Tech": 3, "Verified": 4 };
         const receiptModal = document.getElementById('receiptModal');
         const generatorModal = document.getElementById('generatorModal');
         const settingsModal = document.getElementById('settingsModal');
+        
         let currentCategoryData = [];
         let currentRegion = "";
-
         let userSettings = JSON.parse(localStorage.getItem('receiptSettings')) || null;
 
+        // ==========================================================================
+        // BEÁLLÍTÁSOK KEZELÉSE (USER SETTINGS)
+        // ==========================================================================
         function openSettings() {
             if(userSettings) {
+                // Visszatöltjük a böngészőből a lementett adatokat az űrlapba
                 document.getElementById('set_email').value = userSettings.email || '';
                 document.getElementById('set_name').value = userSettings.name || '';
                 document.getElementById('set_street').value = userSettings.street || '';
@@ -506,7 +741,7 @@
                 document.getElementById('set_country').value = userSettings.country || '';
                 document.getElementById('set_card').value = userSettings.card || '';
             }
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden'; // Háttér görgetésének blokkolása
             settingsModal.classList.remove('hidden-modal');
             settingsModal.classList.add('active-modal');
         }
@@ -514,12 +749,14 @@
         function closeSettings() {
             settingsModal.classList.remove('active-modal');
             settingsModal.classList.add('hidden-modal');
+            // Csak akkor engedjük újra a görgetést, ha nincs nyitva másik Modal
             if(receiptModal.classList.contains('hidden-modal') && generatorModal.classList.contains('hidden-modal')) {
                 document.body.style.overflow = 'auto';
             }
         }
 
         function saveSettings() {
+            // Adatok kinyerése az űrlapból
             userSettings = {
                 email: document.getElementById('set_email').value,
                 name: document.getElementById('set_name').value,
@@ -529,33 +766,44 @@
                 country: document.getElementById('set_country').value,
                 card: document.getElementById('set_card').value
             };
+            // Titkosítva mentjük a böngésző LocalStorage-éba
             localStorage.setItem('receiptSettings', JSON.stringify(userSettings));
+            
+            // Sikeres mentés jelzése
             const alertBox = document.getElementById('settingsAlert');
             alertBox.classList.remove('hidden');
-            setTimeout(() => { alertBox.classList.add('hidden'); closeSettings(); }, 1500);
+            setTimeout(() => { 
+                alertBox.classList.add('hidden'); 
+                closeSettings(); 
+            }, 1500);
         }
 
         function generateSettingsAddress(type) {
+            // Generálunk egy random kártyaszámot 1000 és 9999 között
             const randomCard = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('set_card').value = randomCard;
 
             if(type === 'US') {
-                const firstNames = ["James", "John", "Robert", "Michael", "William", "David"];
-                const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia"];
-                const streets = ["123 Sneaker St", "456 Hype Ave", "789 Legit Blvd", "101 Retail Rd"];
-                const cities = [{c: "Los Angeles", p: "90001"}, {c: "New York", p: "10001"}, {c: "Miami", p: "33101"}];
+                const firstNames = ["James", "John", "Robert", "Michael", "William", "David", "Jessica", "Sarah"];
+                const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Davis"];
+                const streets = ["123 Sneaker St, Apt 4", "456 Hype Ave", "789 Legit Blvd", "101 Retail Rd", "233 Jordan Lane"];
+                const cities = [{c: "Los Angeles", p: "90001"}, {c: "New York", p: "10001"}, {c: "Miami", p: "33101"}, {c: "Chicago", p: "60601"}];
+                
                 let rCity = cities[Math.floor(Math.random()*cities.length)];
                 document.getElementById('set_name').value = firstNames[Math.floor(Math.random()*firstNames.length)] + " " + lastNames[Math.floor(Math.random()*lastNames.length)];
                 document.getElementById('set_street').value = streets[Math.floor(Math.random()*streets.length)];
                 document.getElementById('set_city').value = rCity.c;
                 document.getElementById('set_postal').value = rCity.p;
                 document.getElementById('set_country').value = "United States";
+                
             } else if(type === 'HU') {
-                const firstNames = ["Bence", "Máté", "Dávid", "Balázs", "Tamás", "Péter"];
-                const lastNames = ["Kovács", "Nagy", "Szabó", "Tóth", "Kiss", "Varga"];
-                const streets = ["Kossuth Lajos utca 12.", "Petőfi Sándor utca 45.", "Fő tér 1.", "Rákóczi út 88."];
-                const cities = [{c: "Budapest", p: "1053"}, {c: "Debrecen", p: "4024"}, {c: "Szeged", p: "4002"}];
+                const firstNames = ["Bence", "Máté", "Dávid", "Balázs", "Tamás", "Péter", "Anna", "Zsófia"];
+                const lastNames = ["Kovács", "Nagy", "Szabó", "Tóth", "Kiss", "Varga", "Farkas"];
+                const streets = ["Kossuth Lajos utca 12.", "Petőfi Sándor utca 45.", "Fő tér 1.", "Rákóczi út 88. 2/4"];
+                const cities = [{c: "Budapest", p: "1053"}, {c: "Debrecen", p: "4024"}, {c: "Szeged", p: "4002"}, {c: "Győr", p: "4000"}];
+                
                 let rCity = cities[Math.floor(Math.random()*cities.length)];
+                // Magyarországon a vezetéknév van elöl
                 document.getElementById('set_name').value = lastNames[Math.floor(Math.random()*lastNames.length)] + " " + firstNames[Math.floor(Math.random()*firstNames.length)];
                 document.getElementById('set_street').value = streets[Math.floor(Math.random()*streets.length)];
                 document.getElementById('set_city').value = rCity.c;
@@ -564,21 +812,31 @@
             }
         }
 
-        // ================= SABLON VÁLASZTÓ =================
+        // ==========================================================================
+        // SABLON VÁLASZTÓ ÉS GITHUB KÉP BETÖLTŐ
+        // ==========================================================================
         async function openModal(category) {
             currentRegion = category;
             document.getElementById('modalTitle').textContent = category + " Receipts";
             const modalContent = document.getElementById('modalContent');
             
-            modalContent.innerHTML = '<div class="col-span-full py-10 text-center text-zinc-500 font-bold">Loading available templates...</div>';
+            // Töltőképernyő amíg a Vercel-en ellenőrzi a fájlokat
+            modalContent.innerHTML = `
+                <div class="col-span-full py-20 flex flex-col items-center justify-center gap-4">
+                    <svg class="w-10 h-10 animate-spin text-zinc-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span class="text-zinc-500 font-bold uppercase tracking-widest text-sm">Validating physical templates...</span>
+                </div>
+            `;
             
             document.body.style.overflow = 'hidden'; 
             receiptModal.classList.remove('hidden-modal');
             receiptModal.classList.add('active-modal');
             
+            // Kiszűrjük azokat a sablonokat, amik nincsenek benne ténylegesen a Vercel "templates" mappában
             const validItems = [];
             await Promise.all(receiptData[category].map(async (item) => {
                 try {
+                    // Csinálunk egy "HEAD" kérést (csak a fejlécet kéri le, nem a fájlt, így villámgyors)
                     const response = await fetch(`templates/${item.file}`, { method: 'HEAD' });
                     if (response.ok) {
                         validItems.push(item);
@@ -588,6 +846,7 @@
                 }
             }));
 
+            // Sorrendbe állítás a fontosság szerint
             const sortedData = validItems.sort((a, b) => {
                 return (sortOrder[a.status] || 99) - (sortOrder[b.status] || 99);
             });
@@ -596,41 +855,69 @@
             modalContent.innerHTML = '';
             
             if (sortedData.length === 0) {
-                modalContent.innerHTML = '<div class="col-span-full py-10 text-center text-zinc-500 font-bold">No available templates found in the Vercel templates folder.</div>';
+                modalContent.innerHTML = `
+                    <div class="col-span-full py-20 flex flex-col items-center justify-center gap-4 text-center">
+                        <svg class="w-16 h-16 text-zinc-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="text-zinc-400 font-bold text-lg">No available templates found in the physical folder.</span>
+                        <span class="text-zinc-600 text-sm">Please upload the HTML files to the 'templates' directory on your server.</span>
+                    </div>
+                `;
             }
 
+            // Kártyák generálása
             sortedData.forEach((item, index) => {
-                let statusColor = "bg-white/10 text-white";
-                if(item.status === "Luxury") statusColor = "bg-amber-500/20 text-amber-400";
-                if(item.status === "Premium") statusColor = "bg-purple-500/20 text-purple-400";
-                if(item.status === "Tech") statusColor = "bg-blue-500/20 text-blue-400";
-                if(item.status === "Verified") statusColor = "bg-green-500/20 text-green-400";
+                // Státusz jelvény színezése
+                let statusColor = "bg-white/10 text-white border-white/20";
+                if(item.status === "Luxury") statusColor = "bg-amber-500/10 text-amber-400 border-amber-500/20 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]";
+                if(item.status === "Premium") statusColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
+                if(item.status === "Tech") statusColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                if(item.status === "Verified") statusColor = "bg-green-500/10 text-green-400 border-green-500/20";
 
-                // KÉP DINAMIKUS BETÖLTÉSE FÁJLNÉV ALAPJÁN (JPG, VAGY HA NINCS, PNG)
+                // ==========================================================================
+                // A GITHUB REPO INTELLIGENS KÉPBETÖLTŐ RENDSZERE (5 FALLBACK LÉPÉS)
+                // ==========================================================================
                 const baseName = item.file.replace('.html', '');
-                const imgJpg = `images/${baseName}.jpg`;
-                const imgPng = `images/${baseName}.png`;
-                const fallbackImg = `https://via.placeholder.com/400x300/1a1a1a/555555?text=${baseName}`;
+                
+                // Védjük az URL-t (A szóközök %20-ra cserélődnek, stb.)
+                const encodedName = encodeURIComponent(baseName);
+                
+                // 1. és 2. Lokális próbálkozások (A saját szerver "images" mappájából)
+                const localJpg = `images/${encodedName}.jpg`;
+                const localPng = `images/${encodedName}.png`;
+                
+                // 3. és 4. Közvetlen GitHub Repo hívás Raw formátumban (A te általad megadott linkből)
+                // Ha a local betöltés meghal, egyenesen a GitHubról szívja le!
+                const githubJpg = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${encodedName}.jpg`;
+                const githubPng = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${encodedName}.png`;
+                
+                // 5. Végső Fallback: Ha sehol nincs meg a kép, legenerál egy sötét Placeholder-t a névvel
+                const fallbackImg = `https://via.placeholder.com/400x300/111111/555555?text=${encodedName}`;
+
+                // Összerakjuk a gigantikus OnError láncot az <img> tag-hez
+                // JS Logika: Ha Hiba -> próbáld LocalPNG -> Ha Hiba -> próbáld GitHubJPG -> Ha Hiba -> próbáld GitHubPNG -> Fallback!
+                const fallbackChain = `this.onerror=null; this.src='${localPng}'; this.onerror=function(){this.onerror=null; this.src='${githubJpg}'; this.onerror=function(){this.onerror=null; this.src='${githubPng}'; this.onerror=function(){this.src='${fallbackImg}'};};};`;
 
                 const card = `
-                    <div onclick="openGenerator(${index})" class="store-card glass-card rounded-xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]" style="animation-delay: ${Math.random() * 0.2}s">
-                        <div class="h-40 md:h-48 bg-zinc-900/50 flex items-center justify-center relative overflow-hidden">
-                            <img src="${imgJpg}" alt="${item.name} Preview" 
-                                 class="absolute inset-0 w-full h-full object-contain p-4 opacity-90 group-hover:opacity-30 transition-opacity duration-300" 
-                                 onerror="this.onerror=null; this.src='${imgPng}'; this.addEventListener('error', () => this.src='${fallbackImg}');">
-                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-300 flex items-center justify-center backdrop-blur-[2px] opacity-0 group-hover:opacity-100">
-                                <span class="bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                    <div onclick="openGenerator(${index})" class="store-card glass-card rounded-2xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]" style="animation-delay: ${index * 0.05}s">
+                        <div class="h-40 md:h-48 bg-black/60 flex items-center justify-center relative overflow-hidden">
+                            <img src="${localJpg}" alt="${item.name} Receipt Preview" 
+                                 class="absolute inset-0 w-full h-full object-contain p-6 opacity-80 group-hover:opacity-20 transition-opacity duration-500 group-hover:scale-105" 
+                                 onerror="${fallbackChain}">
+                                 
+                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-500 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100">
+                                <span class="bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-black uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.4)]">
                                     Generate
                                 </span>
                             </div>
                         </div>
-                        <div class="p-4 md:p-5 flex flex-col flex-grow bg-black/40 relative z-10 border-t border-white/5">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="text-base md:text-lg font-bold text-white tracking-tight">${item.name}</h4>
-                                <span class="px-2 py-1 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider ${statusColor}">
+                        <div class="p-5 md:p-6 flex flex-col flex-grow bg-black/50 relative z-10 border-t border-white/5">
+                            <div class="flex justify-between items-start mb-2 gap-2">
+                                <h4 class="text-base md:text-xl font-bold text-white tracking-tight truncate">${item.name}</h4>
+                                <span class="px-2.5 py-1 rounded border text-[9px] md:text-[10px] font-bold uppercase tracking-wider shrink-0 ${statusColor}">
                                     ${item.status}
                                 </span>
                             </div>
+                            <span class="text-zinc-500 text-xs font-medium uppercase tracking-widest">${item.tag}</span>
                         </div>
                     </div>
                 `;
@@ -638,14 +925,12 @@
             });
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active-modal');
-            document.getElementById(modalId).classList.add('hidden-modal');
-            if(modalId === 'receiptModal') document.body.style.overflow = 'auto'; 
-        }
-
-        // ================= DISCORD LOGIN =================
+        // ==========================================================================
+        // AUTENTIKÁCIÓ (DISCORD OAUTH2)
+        // ==========================================================================
+        
         function discordLogin() {
+            // Itt adod meg a saját Client ID-dat a Developer Portalról!
             const discordOAuthUrl = "https://discord.com/oauth2/authorize?client_id=1482014502345117766&response_type=code&redirect_uri=https%3A%2F%2Freceipt-er.vercel.app&scope=identify+guilds"; 
             window.location.href = discordOAuthUrl;
         }
@@ -655,6 +940,7 @@
             const code = urlParams.get('code');
 
             if (code) {
+                // Eltüntetjük a kódot az URL-ből, hogy ne tűnjön csúnyának
                 window.history.replaceState({}, document.title, "/");
                 try {
                     const response = await fetch(`${API_BASE_URL}/login`, {
@@ -668,16 +954,21 @@
                         currentUser = data.user; 
                         userPlan = data.plan;    
                         sessionToken = data.token; 
+                        
+                        // Titkosan elmentjük a böngészőbe a tokent az auto-loginhoz
                         localStorage.setItem('sessionToken', sessionToken);
                         updateAuthUI();
+                        
+                        showCustomAlert("Authentication Successful", `Welcome back, ${currentUser.username}! Your current access level is: ${userPlan}.`);
                     } else {
-                        showCustomAlert("Login Failed", "Discord Login Failed! Server returned an error.", "Close", null, true);
+                        showCustomAlert("Login Failed", "Discord Authentication Failed! The server rejected the request.", "Close", null, true);
                     }
                 } catch (err) {
                     console.error(err);
-                    showCustomAlert("Connection Error", "Could not connect to the Backend API. Make sure the Python bot is running on your server!", "Close", null, true);
+                    showCustomAlert("Connection Error", "Could not connect to the Backend API. Make sure the Python bot is running on your server and the port is open!", "Close", null, true);
                 }
             } else if (sessionToken) {
+                // AUTO-LOGIN: Ha van már elmentett tokenünk (Pl. F5 frissítés után)
                 try {
                     const response = await fetch(`${API_BASE_URL}/user_info`, {
                         method: 'POST',
@@ -692,6 +983,7 @@
                         localStorage.setItem('sessionToken', sessionToken);
                         updateAuthUI();
                     } else {
+                        // Ha a token lejárt vagy érvénytelen (pl. bot újraindulás de nincs fájl mentés)
                         localStorage.removeItem('sessionToken');
                         sessionToken = null;
                     }
@@ -708,48 +1000,61 @@
             
             if (!currentUser) return; 
 
-            let badgeColor = userPlan === 'Premium' ? 'text-amber-400 bg-amber-500/20' : (userPlan === 'Receipt' ? 'text-green-400 bg-green-500/20' : 'text-zinc-300 bg-zinc-800');
+            // Színezzük a badge-et a jogok alapján
+            let badgeColor = 'text-zinc-300 bg-zinc-800 border-zinc-700'; // Default
+            if (userPlan === 'Premium') badgeColor = 'text-amber-400 bg-amber-500/10 border-amber-500/30 drop-shadow-[0_0_5px_rgba(251,191,36,0.4)]';
+            if (userPlan === 'Receipt') badgeColor = 'text-green-400 bg-green-500/10 border-green-500/30';
             
             const htmlContent = `
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-4 bg-black/40 border border-white/5 pl-4 pr-1.5 py-1.5 rounded-full shadow-lg">
                     <div class="flex flex-col items-end hidden md:flex">
-                        <span class="text-sm font-bold text-white">${currentUser.username}</span>
-                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded ${badgeColor}">${userPlan} Plan</span>
+                        <span class="text-sm font-bold text-white tracking-tight">${currentUser.username}</span>
+                        <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded border ${badgeColor}">${userPlan} Plan</span>
                     </div>
-                    <img src="https://cdn.discordapp.com/avatars/${currentUser.id}/${currentUser.avatar}.png" alt="Avatar" class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white/20">
+                    <div class="relative group">
+                        <div class="absolute inset-0 bg-[#5865F2] rounded-full blur-md opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                        <img src="https://cdn.discordapp.com/avatars/${currentUser.id}/${currentUser.avatar}.png" alt="Avatar" class="relative w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white/20">
+                    </div>
                 </div>
             `;
             
             authAreaDesktop.innerHTML = htmlContent;
             authAreaMobile.innerHTML = htmlContent;
+            
+            // Eltüntetjük a mobil menüben lévő nagy kék Login gombot, ha már bent van
             if(mobileLoginBtn) mobileLoginBtn.style.display = 'none';
         }
 
-        // ================= DINAMIKUS GENERÁLÓ =================
+        // ==========================================================================
+        // DINAMIKUS GENERÁLÓ MOTOR (HTML ELEMZŐ)
+        // ==========================================================================
         async function openGenerator(itemIndex) {
+            // Jogosultság ellenőrzése
             if (!sessionToken || !currentUser) {
-                showCustomAlert("Access Locked", "You must Login with Discord first to verify your permissions.", "Login via Discord", discordLogin, true);
+                showCustomAlert("Access Locked", "You must Login with Discord first to verify your permissions securely via OAuth2.", "Login via Discord", discordLogin, true);
                 return;
             }
             if (userPlan !== 'Receipt' && userPlan !== 'Premium') {
-                showCustomAlert("Access Denied", "You need a 'Receipt Access' or 'Premium Access' role to generate this receipt. Please purchase a plan.", "View Plans", () => {
+                showCustomAlert("Access Denied", "You need an active 'Receipt Access' or 'Premium Access' license to utilize the generator API.", "View Plans", () => {
                     closeModal('receiptModal');
                     window.location.href = "#pricing"; 
                 }, true);
                 return;
             }
 
+            // Profil beállítások ellenőrzése
             userSettings = JSON.parse(localStorage.getItem('receiptSettings'));
             if(!userSettings || !userSettings.street || !userSettings.card) {
-                showCustomAlert("Profile Required", "Please configure your Settings (Email, Address) before generating.", "Open Settings", openSettings, true);
+                showCustomAlert("Profile Required", "Please configure your Global Settings (Email, Physical Address) before generating a receipt.", "Open Settings", openSettings, true);
                 return;
             }
 
+            // Átváltás a másik Modalra
             receiptModal.classList.remove('active-modal');
             receiptModal.classList.add('hidden-modal');
 
             const item = currentCategoryData[itemIndex];
-            document.getElementById('generatorBrandName').textContent = item.name + " Loading...";
+            document.getElementById('generatorBrandName').textContent = item.name;
             
             const dynamicInputsDiv = document.getElementById('dynamicInputs');
             const hiddenInputsBox = document.getElementById('hiddenInputsBox');
@@ -757,29 +1062,35 @@
             hiddenInputsBox.innerHTML = '';
             
             let foundVariables = [];
+            
+            // ==========================================================================
+            // HTML TARTALOM BEOLVASÁSA ÉS ELEMZÉSE (REGEX)
+            // ==========================================================================
             try {
+                // Beolvassuk magát a nyers HTML fájlt a Vercel szerveréről
                 const response = await fetch(`templates/${item.file}`);
-                if (!response.ok) throw new Error(`HTML File not found!`);
+                if (!response.ok) throw new Error(`HTML File not found! HTTP ${response.status}`);
                 const htmlContent = await response.text();
                 
+                // Regex: Megkeresünk mindent, ami {kapcsos_zarojelek} között van (Pl: {product_name})
                 const regex = /\{([a-zA-Z0-9_]+)\}/g; 
                 let match;
                 const varsSet = new Set();
                 while ((match = regex.exec(htmlContent)) !== null) {
-                    varsSet.add(match[1]);
+                    varsSet.add(match[1]); // Csak a nevet mentjük, a zárójeleket levágjuk
                 }
                 foundVariables = [...varsSet];
             } catch (err) {
-                showCustomAlert("Template Error", "Make sure the 'templates' folder exists on Vercel and " + item.file + " is inside it!", "Close", closeGenerator, true);
+                showCustomAlert("Template Error", "Critical failure while analyzing the physical HTML structure. " + err.message, "Close", closeGenerator, true);
                 return;
             }
 
-            document.getElementById('generatorBrandName').textContent = item.name;
             let hasPrice = false;
 
+            // Szállítási és rendelési dátumok dinamikus generálása
             const today = new Date();
             const delivery = new Date();
-            delivery.setDate(today.getDate() + 4);
+            delivery.setDate(today.getDate() + 4); // +4 nap szállítás
 
             let formattedDate = currentRegion === 'Hungarian' 
                 ? today.toLocaleDateString('hu-HU').replace(/-/g, '. ') 
@@ -789,11 +1100,14 @@
                 ? delivery.toLocaleDateString('hu-HU').replace(/-/g, '. ') 
                 : delivery.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
+            // Kiszűrjük azokat, amiket a Python Backend teljesen automatikusan megcsinál!
+            // Order_number = random, Total_Price = matematika. Ezeket sosem kérjük be.
             const uniqueVars = foundVariables.filter(v => {
                 const l = v.toLowerCase();
                 return l !== 'order_number' && l !== 'total_price' && l !== 'email';
             });
 
+            // Ezeket az adatokat a Settings Modalból szedjük ki. Ezeket sem kérjük be újra.
             const settingsVars = [
                 'customer_name', 'client_name', 'shipping_address', 'billing_address', 'delivery_address', 'address',
                 'city', 'zip', 'postal_code', 'country', 'street',
@@ -802,14 +1116,18 @@
                 'subtotal', 'subtotal_price'
             ];
 
+            // Végigmegyünk a talált változókon, és felépítjük a formot
             uniqueVars.forEach(variable => {
                 const lowerVar = variable.toLowerCase();
-                const isPriceField = (lowerVar.includes('price') || lowerVar.includes('fee') || lowerVar.includes('cost') || lowerVar.includes('tax')) && !lowerVar.includes('subtotal');
+                
+                // Keresünk benne árra utaló szavakat, hogy tudjuk, ezt be kell vonni az okos matematikába
+                const isPriceField = (lowerVar.includes('price') || lowerVar.includes('fee') || lowerVar.includes('cost') || lowerVar.includes('tax') || lowerVar.includes('ar')) && !lowerVar.includes('subtotal');
                 if(isPriceField) hasPrice = true;
                 
                 const isSettingsVar = settingsVars.includes(lowerVar);
 
                 if (isSettingsVar) {
+                    // Ha a Settings része, csinálunk egy láthatatlan (Hidden) inputot
                     let val = "";
                     if(lowerVar.includes('name')) val = userSettings.name;
                     else if(lowerVar === 'city') val = userSettings.city;
@@ -821,26 +1139,40 @@
                     else if(lowerVar.includes('delivery')) val = formattedDelDate;
                     else if(lowerVar === 'card' || lowerVar === 'card_type' || lowerVar === 'card_brand') val = "Visa";
                     else if(lowerVar.includes('card')) val = userSettings.card;
-                    else if(lowerVar.includes('subtotal')) val = ""; 
+                    else if(lowerVar.includes('subtotal')) val = ""; // A Python majd kiszámolja!
                     
                     hiddenInputsBox.innerHTML += `<input type="hidden" id="hidden_${variable}" name="${variable}" value="${val}">`;
                 } else {
+                    // Ha egyedi adat (Pl. product_name, size, color), csinálunk neki egy szép Input dobozt!
+                    
+                    // Szebbé tesszük a változó nevét: "product_name" -> "Product Name"
                     const niceLabel = variable.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                    const extraClass = isPriceField ? 'calc-price-input' : '';
+                    
+                    // Ha ár mező, hozzáadunk egy OnInput triggert, ami valós időben számolja a Total-t
+                    const extraClass = isPriceField ? 'calc-price-input text-green-400 font-bold' : 'text-white';
                     const onInputAttr = isPriceField ? `oninput="formatAndCalculate(this)"` : '';
+                    
+                    // Okos Placeholder a jobb User Experience-ért
+                    let ph = "Enter " + niceLabel;
+                    if(isPriceField) ph = "e.g. 15000";
+                    if(lowerVar.includes('image') || lowerVar.includes('link') || lowerVar.includes('url')) ph = "https://cdn.discordapp.com/...";
+                    if(lowerVar.includes('size')) ph = "44.5 / M / 9 US";
+                    if(lowerVar.includes('color')) ph = "Black / White";
+                    if(lowerVar.includes('brand')) ph = "e.g. Sp5der";
 
                     const inputHtml = `
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wider">${niceLabel}</label>
+                        <div class="reveal-fade">
+                            <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">${niceLabel}</label>
                             <input type="text" id="input_${variable}" name="${variable}" required ${onInputAttr}
-                                class="${extraClass} w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white/30 transition-colors placeholder-zinc-700" 
-                                placeholder="${isPriceField ? 'e.g. 15000' : 'Enter ' + niceLabel}">
+                                class="${extraClass} w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 focus:outline-none focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all placeholder-zinc-700" 
+                                placeholder="${ph}">
                         </div>
                     `;
                     dynamicInputsDiv.innerHTML += inputHtml;
                 }
             });
 
+            // Ha van ár az űrlapon, láthatóvá tesszük az élő számológép dobozát
             const totalBox = document.getElementById('totalPriceBox');
             if (hasPrice) {
                 totalBox.classList.remove('hidden');
@@ -851,23 +1183,35 @@
 
             generatorModal.classList.remove('hidden-modal');
             generatorModal.classList.add('active-modal');
+            
+            // Újra triggereljük az animációkat a Modalban lévő elemekre
+            setTimeout(reveal, 50);
         }
 
+        // ==========================================================================
+        // ÉLŐ MATEMATIKA: Számológép az űrlapon
+        // ==========================================================================
         function formatAndCalculate(inputElement) {
+            // Betűk eltávolítása, csak a számokat engedjük (hogy tudjunk vele számolni)
             let rawValue = inputElement.value.replace(/[^0-9]/g, '');
             if (rawValue !== '') {
                 let number = parseInt(rawValue, 10);
+                
+                // Formázás valós időben, miközben gépel (Ezresek elválasztása)
                 if (currentRegion === 'Hungarian') {
+                    // Magyar: 119 990
                     inputElement.value = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
                 } else {
+                    // Amerikai: 119.990
                     inputElement.value = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 }
             } else {
                 inputElement.value = '';
             }
 
+            // Ha az alapárat gépeli be, automatikusan lemásoljuk a rejtett Subtotal inputba is
             const lowerName = inputElement.name.toLowerCase();
-            if(lowerName === 'product_price' || lowerName === 'item_price') {
+            if(lowerName === 'product_price' || lowerName === 'item_price' || lowerName === 'termek_ar') {
                 const hiddenInputs = document.querySelectorAll('#hiddenInputsBox input');
                 hiddenInputs.forEach(hInput => {
                     if(hInput.name.toLowerCase().includes('subtotal')) {
@@ -876,17 +1220,23 @@
                 });
             }
 
+            // Minden módosításnál újraszámoljuk az összesítést!
             calculateTotal();
         }
 
         function calculateTotal() {
             let total = 0;
+            // Megkeresünk minden ár típusú inputot (Price, Tax, Shipping)
             const inputs = document.querySelectorAll('.calc-price-input');
             inputs.forEach(input => {
+                // Kinyerjük a nyers számot a formázott szövegből (Pl. "15 000" -> 15000)
                 const rawVal = input.value.replace(/[^0-9]/g, '');
-                if(rawVal !== '') { total += parseInt(rawVal, 10); }
+                if(rawVal !== '') { 
+                    total += parseInt(rawVal, 10); 
+                }
             });
 
+            // Formázva kiírjuk a zöld dobozba
             let formattedTotal = "";
             if (currentRegion === 'Hungarian') {
                 formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " Ft";
@@ -903,32 +1253,42 @@
             receiptModal.classList.add('active-modal');
         }
 
+        // ==========================================================================
+        // VÉGLEGES KÜLDÉS A PYTHON API-NAK
+        // ==========================================================================
         async function submitGeneration() {
             const btn = document.getElementById('submitBtn');
-            btn.innerHTML = `<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sending...`;
+            // Betöltő ikon animáció a gombon
+            btn.innerHTML = `<svg class="w-6 h-6 animate-spin text-black" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Interfacing with Core...`;
             btn.disabled = true;
+            btn.classList.add('opacity-70');
 
+            // Létrehozzuk az adatcsomagot (Payload) amit a Python vár
             const payload = {
-                token: sessionToken,
+                token: sessionToken, // Az Auth Token a jogokhoz
                 template: document.getElementById('generatorBrandName').textContent.replace(' Loading...', ''),
                 variables: {}
             };
 
+            // Összeszedjük a felhasználó által kitöltött látható mezőket
             const inputs = document.querySelectorAll('#generatorForm input');
             inputs.forEach(i => {
                 payload.variables[i.name] = i.value;
             });
 
+            // Hozzáadjuk a láthatatlan (Settingsből jövő) mezőket is
             const hiddenInputs = document.querySelectorAll('#hiddenInputsBox input');
             hiddenInputs.forEach(i => {
                 payload.variables[i.name] = i.value;
             });
             
+            // Speciális felülírás: Ha véletlenül valahogy lemaradna az email...
             if(userSettings && userSettings.email) {
                 payload.variables['email'] = userSettings.email;
             }
 
             try {
+                // Postázás az aszinkron aiohttp szervernek
                 const response = await fetch(`${API_BASE_URL}/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -936,23 +1296,32 @@
                 });
 
                 if(response.ok) {
+                    // Ha a Python sikerrel visszaigazol:
                     document.getElementById('sendStatus').classList.remove('hidden');
                     setTimeout(() => { 
                         document.getElementById('sendStatus').classList.add('hidden');
                         closeGenerator(); 
+                        showCustomAlert("Receipt Dispatched", "The receipt has been successfully compiled and sent to your physical email address via secure SMTP. Check your inbox (and spam folder)!", "Acknowledge");
                     }, 2000);
                 } else {
+                    // Ha a Python elakad (Pl. hibás token, rossz sablon)
                     const errorText = await response.text();
-                    showCustomAlert("Generation Failed", "Bot Error: " + errorText, "Close", null, true);
+                    showCustomAlert("Compilation Failed", "Core Exception: " + errorText, "Dismiss", null, true);
                 }
             } catch (err) {
-                showCustomAlert("Connection Error", "Cannot reach Python Bot! Is the server running on your VPS?", "Close", null, true);
+                // Ha a szerver egyáltalán nem is fut, vagy a port le van zárva
+                showCustomAlert("Network Error", "Failed to reach the Backend API Server. Is the Python process running on your VPS and is port 8080 exposed?", "Dismiss", null, true);
             }
 
-            btn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Generate & Send Email`;
+            // Visszaállítjuk a gombot eredeti formájába
+            btn.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg> Compile & Send Email`;
             btn.disabled = false;
+            btn.classList.remove('opacity-70');
         }
 
+        // ==========================================================================
+        // CHECKOUT RENDSZER (WHOP.COM)
+        // ==========================================================================
         function buyPlan(plan) {
             const whopLinks = {
                 'resell': 'https://whop.com/receipter/resell-access',
@@ -963,11 +1332,12 @@
             if (whopLinks[plan]) {
                 window.location.href = whopLinks[plan];
             } else {
-                showCustomAlert("Redirecting", "Taking you to checkout for the " + plan.toUpperCase() + " plan...", "Continue");
+                showCustomAlert("Routing Request", "Taking you to checkout for the " + plan.toUpperCase() + " plan...", "Continue");
             }
         }
 
-        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }</style>`);
+        // CSS Alapú Fade-In betöltődik JavaScriptből a teljes biztonságért
+        document.head.insertAdjacentHTML("beforeend", `<style>@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }</style>`);
     </script>
 </body>
 </html>
