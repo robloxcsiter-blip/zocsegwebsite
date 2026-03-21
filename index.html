@@ -6,24 +6,31 @@
     <title>receipt.er | Premium Email Receipt Generator</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
     
     <style>
+        /* ==========================================================================
+           1. ALAPVETŐ VÁLTOZÓK ÉS GLOBÁLIS STÍLUSOK
+           ========================================================================== */
         :root {
             --bg-color: #000000;
             --card-bg: rgba(20, 20, 20, 0.6);
             --border-color: rgba(255, 255, 255, 0.1);
+            --accent-color: #5865F2; /* Discord Blurple */
+            --accent-hover: #4752c4;
         }
         
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-color); 
             color: #ffffff;
-            overflow-x: hidden; 
+            overflow-x: hidden; /* Ne lehessen oldalra görgetni mobilon */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
         
+        /* Rácsos háttér minta (Sötét, high-tech hatás) */
         .bg-grid {
             background-size: 40px 40px;
             background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -32,6 +39,7 @@
             -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 40%, transparent 95%);
         }
         
+        /* Üveg hatású kártyák (Glassmorphism) */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -46,6 +54,7 @@
             box-shadow: 0 15px 45px -10px rgba(255, 255, 255, 0.1);
         }
 
+        /* Gradient szöveg effektek */
         .text-gradient {
             background: linear-gradient(to right, #ffffff, #71717a);
             -webkit-background-clip: text;
@@ -54,42 +63,123 @@
             color: transparent;
         }
 
-        .reveal-fade { opacity: 0; transition: opacity 0.8s ease-out; }
-        .reveal-fade.active { opacity: 1; }
+        /* ==========================================================================
+           2. FEJLETT GÖRGETÉSI ANIMÁCIÓK (SCROLL REVEAL)
+           ========================================================================== */
         
-        .reveal-slide-up { opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .reveal-slide-up.active { opacity: 1; transform: translateY(0); }
+        /* Sima elhalványulás */
+        .reveal-fade { 
+            opacity: 0; 
+            transition: opacity 0.8s ease-out; 
+        }
+        .reveal-fade.active { 
+            opacity: 1; 
+        }
         
-        .reveal-slide-left { opacity: 0; transform: translateX(-50px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .reveal-slide-left.active { opacity: 1; transform: translateX(0); }
+        /* Alulról felfelé csúszás */
+        .reveal-slide-up { 
+            opacity: 0; 
+            transform: translateY(50px); 
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .reveal-slide-up.active { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
         
-        .reveal-slide-right { opacity: 0; transform: translateX(50px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .reveal-slide-right.active { opacity: 1; transform: translateX(0); }
+        /* Balról jobbra csúszás */
+        .reveal-slide-left { 
+            opacity: 0; 
+            transform: translateX(-50px); 
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .reveal-slide-left.active { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
         
-        .reveal-zoom { opacity: 0; transform: scale(0.85); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .reveal-zoom.active { opacity: 1; transform: scale(1); }
+        /* Jobbról balra csúszás */
+        .reveal-slide-right { 
+            opacity: 0; 
+            transform: translateX(50px); 
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .reveal-slide-right.active { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+        
+        /* Nagyítás (Zoom-in) */
+        .reveal-zoom { 
+            opacity: 0; 
+            transform: scale(0.85); 
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .reveal-zoom.active { 
+            opacity: 1; 
+            transform: scale(1); 
+        }
 
+        /* Késleltetések (Stagger) a kártyákhoz */
         .stagger-1 { transition-delay: 100ms; }
         .stagger-2 { transition-delay: 200ms; }
         .stagger-3 { transition-delay: 300ms; }
         .stagger-4 { transition-delay: 400ms; }
 
-        .modal-base { transition: opacity 0.4s ease, visibility 0.4s ease; }
-        .hidden-modal { opacity: 0; visibility: hidden; pointer-events: none; }
-        .active-modal { opacity: 1; visibility: visible; pointer-events: auto; }
+        /* ==========================================================================
+           3. MODAL (FELUGRÓ ABLAK) STÍLUSOK
+           ========================================================================== */
         
-        .store-card { transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .store-card:hover { transform: scale(1.03); border-color: rgba(255, 255, 255, 0.6); box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+        .modal-base { 
+            transition: opacity 0.4s ease, visibility 0.4s ease; 
+        }
+        .hidden-modal { 
+            opacity: 0; 
+            visibility: hidden; 
+            pointer-events: none; 
+        }
+        .active-modal { 
+            opacity: 1; 
+            visibility: visible; 
+            pointer-events: auto; 
+        }
 
-        #mobileMenu { transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out; transform-origin: top; }
-        .mobile-menu-hidden { transform: scaleY(0); opacity: 0; pointer-events: none; }
-        .mobile-menu-active { transform: scaleY(1); opacity: 1; pointer-events: auto; }
+        /* Kártya hover animáció a sablonválasztóhoz */
+        .store-card { 
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        .store-card:hover { 
+            transform: scale(1.03); 
+            border-color: rgba(255, 255, 255, 0.6); 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
 
+        /* ==========================================================================
+           4. MOBIL MENÜ ÉS SCROLLBAR STÍLUSOK
+           ========================================================================== */
+        
+        #mobileMenu {
+            transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+            transform-origin: top;
+        }
+        .mobile-menu-hidden {
+            transform: scaleY(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .mobile-menu-active {
+            transform: scaleY(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Görgetősáv (Scrollbar) dizájn */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #444; }
         
+        /* Alap HTML tag eltüntetések */
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
     </style>
@@ -565,31 +655,31 @@
         }
 
         // ==========================================================================
-        // ADATBÁZIS: A VISSZAÁLLÍTOTT EREDETI IMAGE KULCSOKKAL!
+        // ADATBÁZIS: Kézzel beírt, PONTOS .png fájlnevekkel
         // ==========================================================================
         const receiptData = {
             Hungarian: [
-                { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", image: "balazskicks.jpg", file: "BalazsKICKS.html" },
-                { name: "OnSize", status: "Verified", tag: "Sneaker", image: "onsize.jpg", file: "OnSize.html" },
-                { name: "Footshop HU", status: "Verified", tag: "Sneaker", image: "footshop.jpg", file: "FootshopHU.html" },
-                { name: "Nike HU", status: "Verified", tag: "Sportswear", image: "nike.jpg", file: "NikeHU.html" },
-                { name: "Adidas HU", status: "Verified", tag: "Sportswear", image: "adidas.jpg", file: "AdidasHU.html" },
-                { name: "Tiszacipo", status: "Verified", tag: "Local", image: "tisza.jpg", file: "Tisza.html" },
-                { name: "True To Sole", status: "Verified", tag: "Sneaker", image: "tts.jpg", file: "TrueToSole.html" }
+                { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", image: "balazskicks.png", file: "BalazsKICKS.html" },
+                { name: "OnSize", status: "Verified", tag: "Sneaker", image: "onsize.png", file: "OnSize.html" },
+                { name: "Footshop HU", status: "Verified", tag: "Sneaker", image: "footshop.png", file: "FootshopHU.html" },
+                { name: "Nike HU", status: "Verified", tag: "Sportswear", image: "nike.png", file: "NikeHU.html" },
+                { name: "Adidas HU", status: "Verified", tag: "Sportswear", image: "adidas.png", file: "AdidasHU.html" },
+                { name: "Tiszacipo", status: "Verified", tag: "Local", image: "tisza.png", file: "Tisza.html" },
+                { name: "True To Sole", status: "Verified", tag: "Sneaker", image: "tts.png", file: "TrueToSole.html" }
             ],
             International: [
-                { name: "Louis Vuitton", status: "Luxury", tag: "Fashion", image: "louisvuitton.jpg", file: "Louis Vuitton.html" },
-                { name: "StockX", status: "Verified", tag: "Marketplace", image: "stockx.jpg", file: "StockX.html" },
-                { name: "Apple", status: "Tech", tag: "Electronics", image: "apple.jpg", file: "Apple.html" },
-                { name: "Dior", status: "Luxury", tag: "Fashion", image: "dior.jpg", file: "DIOR.html" },
-                { name: "GOAT", status: "Verified", tag: "Marketplace", image: "goat.jpg", file: "GOAT.html" },
-                { name: "Moncler", status: "Luxury", tag: "Fashion", image: "moncler.jpg", file: "MONCLER.html" },
-                { name: "Hermes", status: "Luxury", tag: "Fashion", image: "hermes.jpg", file: "Hermes.html" },
-                { name: "Gucci", status: "Luxury", tag: "Fashion", image: "gucci.jpg", file: "Gucci.html" },
-                { name: "Prada", status: "Luxury", tag: "Fashion", image: "prada.jpg", file: "Prada.html" },
-                { name: "Farfetch", status: "Luxury", tag: "Marketplace", image: "farfetch.jpg", file: "Farfetch.html" },
-                { name: "SSENSE", status: "Luxury", tag: "Marketplace", image: "ssense.jpg", file: "SSENSE.html" },
-                { name: "Grailed", status: "Verified", tag: "Marketplace", image: "grailed.jpg", file: "Grailed.html" }
+                { name: "Louis Vuitton", status: "Luxury", tag: "Fashion", image: "louisvuitton.png", file: "Louis Vuitton.html" },
+                { name: "StockX", status: "Verified", tag: "Marketplace", image: "stockx.png", file: "StockX.html" },
+                { name: "Apple", status: "Tech", tag: "Electronics", image: "apple.png", file: "Apple.html" },
+                { name: "Dior", status: "Luxury", tag: "Fashion", image: "dior.png", file: "DIOR.html" },
+                { name: "GOAT", status: "Verified", tag: "Marketplace", image: "goat.png", file: "GOAT.html" },
+                { name: "Moncler", status: "Luxury", tag: "Fashion", image: "moncler.png", file: "MONCLER.html" },
+                { name: "Hermes", status: "Luxury", tag: "Fashion", image: "hermes.png", file: "Hermes.html" },
+                { name: "Gucci", status: "Luxury", tag: "Fashion", image: "gucci.png", file: "Gucci.html" },
+                { name: "Prada", status: "Luxury", tag: "Fashion", image: "prada.png", file: "Prada.html" },
+                { name: "Farfetch", status: "Luxury", tag: "Marketplace", image: "farfetch.png", file: "Farfetch.html" },
+                { name: "SSENSE", status: "Luxury", tag: "Marketplace", image: "ssense.png", file: "SSENSE.html" },
+                { name: "Grailed", status: "Verified", tag: "Marketplace", image: "grailed.png", file: "Grailed.html" }
             ]
         };
 
@@ -601,6 +691,40 @@
         let currentCategoryData = [];
         let currentRegion = "";
         let userSettings = JSON.parse(localStorage.getItem('receiptSettings')) || null;
+
+        // ==========================================================================
+        // INTERSECTION OBSERVER ANIMÁCIÓS MOTOR
+        // ==========================================================================
+        document.addEventListener("DOMContentLoaded", () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            const revealElements = document.querySelectorAll('.reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom');
+            revealElements.forEach(el => observer.observe(el));
+        });
+
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 50) { reveals[i].classList.add("active"); }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        setTimeout(reveal, 100);
 
         // ==========================================================================
         // BEÁLLÍTÁSOK KEZELÉSE (USER SETTINGS)
@@ -735,20 +859,17 @@
                 if(item.status === "Tech") statusColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
                 if(item.status === "Verified") statusColor = "bg-green-500/10 text-green-400 border-green-500/20";
 
-                // Végleges Github kép elérési út
+                // ÚJ KÉPBETÖLTÉSI LOGIKA: Közvetlenül a Githubról olvassuk a PNG-t!
                 const githubUrl = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${item.image}`;
-                const fallbackImg = `https://via.placeholder.com/400x300/111111/555555?text=${encodeURIComponent(item.name)}`;
-
-                // Ha a lokális kép nincs meg, azonnal kéri a Github linket
-                const fallbackChain = `this.onerror=null; this.src='${githubUrl}'; this.onerror=function(){this.src='${fallbackImg}'};`;
+                const fallbackUrl = `https://via.placeholder.com/400x300/111111/555555?text=${encodeURIComponent(item.name)}`;
 
                 const card = `
                     <div onclick="openGenerator(${index})" class="store-card glass-card rounded-2xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]" style="animation-delay: ${index * 0.05}s">
                         <div class="h-40 md:h-48 bg-black/60 flex items-center justify-center relative overflow-hidden">
-                            <img src="images/${item.image}" 
+                            <img src="${githubUrl}" 
                                  alt="${item.name} Receipt Preview" 
                                  class="absolute inset-0 w-full h-full object-contain p-6 opacity-80 group-hover:opacity-20 transition-opacity duration-500 group-hover:scale-105" 
-                                 onerror="${fallbackChain}">
+                                 onerror="this.onerror=null; this.src='${fallbackUrl}';">
                                  
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-500 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100">
                                 <span class="bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-black uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.4)]">
@@ -775,6 +896,7 @@
             const modal = document.getElementById(modalId);
             modal.classList.remove('active-modal');
             modal.classList.add('hidden-modal');
+            
             if(modalId === 'receiptModal') {
                 document.body.style.overflow = ''; 
             }
