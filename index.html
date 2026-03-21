@@ -240,6 +240,8 @@
                 Join Discord Server
             </a>
             
+            <hr class="border-white/10">
+            
             <button onclick="openSettings(); toggleMobileMenu();" class="text-white hover:text-black hover:bg-white text-lg font-bold flex items-center gap-2 bg-white/10 px-4 py-4 rounded-xl w-full justify-center transition-all border border-white/10 mt-4">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 Configure Settings
@@ -502,13 +504,13 @@
         <div class="flex-grow p-4 md:p-10 overflow-y-auto flex justify-center items-start">
             <div class="glass-card rounded-[2rem] w-full max-w-3xl p-6 md:p-10 animate-[fadeIn_0.4s_ease-out_forwards] border border-white/20 shadow-2xl">
                 
-                <div class="mb-8 border-b border-white/10 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                    <div>
+                <div class="mb-8 border-b border-white/10 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div class="flex-1 pr-0 md:pr-6">
                         <h3 class="text-2xl md:text-3xl font-black text-white">Global Background Data</h3>
                         <p class="text-zinc-400 text-sm md:text-base mt-2 leading-relaxed">This data is required for receipt generation. The bot will automatically inject your name and address into the templates to save you time.</p>
                     </div>
                     
-                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <div class="flex flex-row gap-3 w-full md:w-auto shrink-0 mt-4 md:mt-0">
                         <button type="button" onclick="generateSettingsAddress('US')" class="flex-1 md:flex-none px-4 py-3 md:py-2 bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
                             🇺🇸 Auto-Fill US
                         </button>
@@ -661,6 +663,31 @@
         }
 
         // ==========================================================================
+        // GITHUB KÉP HIBAKEZELŐ (IMAGE FALLBACK SYSTEM)
+        // Biztosítja, hogy sose legyen törött kép ikon!
+        // ==========================================================================
+        function handleImageError(imgElement, baseName) {
+            // Először megpróbálta a Local JPG-t.
+            if (!imgElement.dataset.triedLocalPng) {
+                // 2. Lépés: Local PNG
+                imgElement.dataset.triedLocalPng = "true";
+                imgElement.src = `images/${baseName}.png`;
+            } else if (!imgElement.dataset.triedGithubJpg) {
+                // 3. Lépés: GitHub Raw JPG
+                imgElement.dataset.triedGithubJpg = "true";
+                imgElement.src = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${baseName}.jpg`;
+            } else if (!imgElement.dataset.triedGithubPng) {
+                // 4. Lépés: GitHub Raw PNG
+                imgElement.dataset.triedGithubPng = "true";
+                imgElement.src = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${baseName}.png`;
+            } else if (!imgElement.dataset.triedPlaceholder) {
+                // 5. Lépés: Helyőrző kép
+                imgElement.dataset.triedPlaceholder = "true";
+                imgElement.src = `https://via.placeholder.com/400x300/111111/555555?text=${baseName}`;
+            }
+        }
+
+        // ==========================================================================
         // INTERSECTION OBSERVER ANIMÁCIÓS MOTOR (Nagyon sima, mobilra optimalizált)
         // ==========================================================================
         document.addEventListener("DOMContentLoaded", () => {
@@ -685,11 +712,22 @@
             revealElements.forEach(el => observer.observe(el));
         });
 
+        // Biztonsági manuális trigger az oldal betöltésekor
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 50) { reveals[i].classList.add("active"); }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        setTimeout(reveal, 100);
+
         // ==========================================================================
         // ADATBÁZIS: A sablonok és tulajdonságaik
         // ==========================================================================
-        // FONTOS: A "kép" (image) attribútumot direkt kivettem, mert a kód lenn 
-        // automatikusan a GitHub Repóból generálja a linkeket a fájlnevek alapján!
+        // A "kép" (image) attribútum kivéve, mert dinamikusan szedjük a Githubról!
         
         const receiptData = {
             Hungarian: [
@@ -873,36 +911,20 @@
                 if(item.status === "Tech") statusColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
                 if(item.status === "Verified") statusColor = "bg-green-500/10 text-green-400 border-green-500/20";
 
-                // ==========================================================================
-                // A GITHUB REPO INTELLIGENS KÉPBETÖLTŐ RENDSZERE (5 FALLBACK LÉPÉS)
-                // ==========================================================================
+                // Biztonságos URL kódolás a képek lekéréséhez (Szóközök %20-ra cserélése)
                 const baseName = item.file.replace('.html', '');
-                
-                // Védjük az URL-t (A szóközök %20-ra cserélődnek, stb.)
                 const encodedName = encodeURIComponent(baseName);
                 
-                // 1. és 2. Lokális próbálkozások (A saját szerver "images" mappájából)
-                const localJpg = `images/${encodedName}.jpg`;
-                const localPng = `images/${encodedName}.png`;
-                
-                // 3. és 4. Közvetlen GitHub Repo hívás Raw formátumban (A te általad megadott linkből)
-                // Ha a local betöltés meghal, egyenesen a GitHubról szívja le!
-                const githubJpg = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${encodedName}.jpg`;
-                const githubPng = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${encodedName}.png`;
-                
-                // 5. Végső Fallback: Ha sehol nincs meg a kép, legenerál egy sötét Placeholder-t a névvel
-                const fallbackImg = `https://via.placeholder.com/400x300/111111/555555?text=${encodedName}`;
-
-                // Összerakjuk a gigantikus OnError láncot az <img> tag-hez
-                // JS Logika: Ha Hiba -> próbáld LocalPNG -> Ha Hiba -> próbáld GitHubJPG -> Ha Hiba -> próbáld GitHubPNG -> Fallback!
-                const fallbackChain = `this.onerror=null; this.src='${localPng}'; this.onerror=function(){this.onerror=null; this.src='${githubJpg}'; this.onerror=function(){this.onerror=null; this.src='${githubPng}'; this.onerror=function(){this.src='${fallbackImg}'};};};`;
+                // Elsődleges próbálkozás a helyi képre (A global error handler intézi a többit!)
+                const initialImageSrc = `images/${encodedName}.jpg`;
 
                 const card = `
                     <div onclick="openGenerator(${index})" class="store-card glass-card rounded-2xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]" style="animation-delay: ${index * 0.05}s">
                         <div class="h-40 md:h-48 bg-black/60 flex items-center justify-center relative overflow-hidden">
-                            <img src="${localJpg}" alt="${item.name} Receipt Preview" 
+                            <img src="${initialImageSrc}" 
+                                 alt="${item.name} Receipt Preview" 
                                  class="absolute inset-0 w-full h-full object-contain p-6 opacity-80 group-hover:opacity-20 transition-opacity duration-500 group-hover:scale-105" 
-                                 onerror="${fallbackChain}">
+                                 onerror="handleImageError(this, '${encodedName}')">
                                  
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-500 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100">
                                 <span class="bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-black uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.4)]">
@@ -923,6 +945,18 @@
                 `;
                 modalContent.innerHTML += card;
             });
+        }
+
+        // TÖKÉLETES BACK GOMB: Most már 100%-osan zárja a modalt, JS hiba nélkül!
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active-modal');
+            modal.classList.add('hidden-modal');
+            
+            // Ha a fő Receipt modal zárult be, engedjük a weblapot újra görgetni
+            if(modalId === 'receiptModal') {
+                document.body.style.overflow = ''; 
+            }
         }
 
         // ==========================================================================
@@ -1054,7 +1088,7 @@
             receiptModal.classList.add('hidden-modal');
 
             const item = currentCategoryData[itemIndex];
-            document.getElementById('generatorBrandName').textContent = item.name;
+            document.getElementById('generatorBrandName').textContent = item.name + " Loading...";
             
             const dynamicInputsDiv = document.getElementById('dynamicInputs');
             const hiddenInputsBox = document.getElementById('hiddenInputsBox');
@@ -1181,6 +1215,7 @@
                 totalBox.classList.add('hidden');
             }
 
+            document.getElementById('generatorBrandName').textContent = item.name;
             generatorModal.classList.remove('hidden-modal');
             generatorModal.classList.add('active-modal');
             
