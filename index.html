@@ -37,11 +37,29 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 40px -10px rgba(255,255,255,0.1);
         }
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        /* ÚJ: Kiterjesztett Animációk */
+        .reveal-up { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-up.active { opacity: 1; transform: translateY(0); }
+        
+        .reveal-left { opacity: 0; transform: translateX(-40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-left.active { opacity: 1; transform: translateX(0); }
+        
+        .reveal-right { opacity: 0; transform: translateX(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-right.active { opacity: 1; transform: translateX(0); }
+        
+        .reveal-scale { opacity: 0; transform: scale(0.9); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal-scale.active { opacity: 1; transform: scale(1); }
+
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        .delay-400 { transition-delay: 400ms; }
+
         .modal-base { transition: opacity 0.4s ease, visibility 0.4s ease; }
         .hidden-modal { opacity: 0; visibility: hidden; pointer-events: none; }
         .active-modal { opacity: 1; visibility: visible; pointer-events: auto; }
+        
         .store-card { transition: all 0.3s ease; }
         .store-card:hover { transform: scale(1.02); border-color: rgba(255, 255, 255, 0.5); }
         .text-gradient {
@@ -63,11 +81,12 @@
 
     <header class="fixed top-0 w-full z-40 border-b border-white/10 bg-black/50 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-            <div class="text-xl font-extrabold tracking-tighter cursor-pointer text-white flex items-center gap-2" onclick="window.scrollTo(0,0)">
+            <div class="text-2xl font-extrabold tracking-tighter cursor-pointer text-white flex items-center gap-2" onclick="window.scrollTo(0,0)">
                 receipt.er
             </div>
-            <div class="flex gap-8 items-center">
-                <nav class="hidden md:flex gap-6 items-center text-sm font-medium">
+            
+            <div class="hidden md:flex gap-8 items-center">
+                <nav class="flex gap-6 items-center text-sm font-medium">
                     <a href="#how-it-works" class="text-zinc-400 hover:text-white transition-all">How it Works</a>
                     <a href="#receipts-section" class="text-zinc-400 hover:text-white transition-all">Receipts</a>
                     <a href="#pricing" class="text-zinc-400 hover:text-white transition-all">Pricing</a>
@@ -82,99 +101,126 @@
                         Settings
                     </button>
                 </nav>
-                <div id="userAuthArea">
+                <div id="userAuthAreaDesktop">
                     <button onclick="discordLogin()" class="group relative px-5 py-2.5 bg-[#5865F2] text-white text-sm font-bold rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-[0_0_15px_rgba(88,101,242,0.4)]">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
-                        <span>Login with Discord</span>
+                        <span>Login</span>
                     </button>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-4 md:hidden">
+                <div id="userAuthAreaMobile"></div>
+                <button onclick="toggleMobileMenu()" class="text-zinc-400 hover:text-white focus:outline-none">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobileMenu" class="hidden md:hidden absolute top-20 left-0 w-full bg-black/95 backdrop-blur-xl border-b border-white/10 flex-col py-6 px-6 gap-6 z-40 shadow-2xl">
+            <a href="#how-it-works" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium">How it Works</a>
+            <a href="#receipts-section" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium">Receipts</a>
+            <a href="#pricing" onclick="toggleMobileMenu()" class="text-zinc-300 hover:text-white text-lg font-medium">Pricing</a>
+            <a href="https://discord.gg/XaafBJt4HM" target="_blank" onclick="toggleMobileMenu()" class="text-[#5865F2] hover:text-white text-lg font-bold flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
+                Join Discord
+            </a>
+            <hr class="border-white/10">
+            <button onclick="openSettings(); toggleMobileMenu();" class="text-white hover:text-zinc-300 text-lg font-medium flex items-center gap-2 bg-white/10 px-4 py-3 rounded-lg w-full justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Settings
+            </button>
+            <div id="mobileLoginBtn" class="w-full">
+                <button onclick="discordLogin()" class="w-full px-5 py-3 bg-[#5865F2] text-white text-lg font-bold rounded-lg flex items-center justify-center gap-2">
+                    Login with Discord
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow pt-32 w-full">
-        <section class="max-w-5xl mx-auto px-6 pt-24 pb-32 text-center reveal">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs font-medium text-zinc-300 mb-8">
+    <main class="flex-grow pt-24 md:pt-32 w-full">
+        <section class="max-w-5xl mx-auto px-4 md:px-6 pt-16 md:pt-24 pb-20 md:pb-32 text-center">
+            <div class="reveal-scale inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs font-medium text-zinc-300 mb-8">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 Status: ONLINE
             </div>
-            <h1 class="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-tight text-white">
+            <h1 class="reveal-up delay-100 text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 leading-tight text-white">
                 1:1 Email Receipts.<br><span class="text-gradient">Zero effort.</span>
             </h1>
-            <p class="text-lg md:text-xl text-zinc-500 mb-10 max-w-2xl mx-auto font-light">
+            <p class="reveal-up delay-200 text-base sm:text-lg md:text-xl text-zinc-500 mb-10 max-w-2xl mx-auto font-light px-2">
                 The most advanced receipt generator. 1:1 receipt structure, exact email client rendering, ultimate accuracy for premium brands.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#pricing" class="px-8 py-4 bg-white text-black rounded-lg font-bold hover:bg-zinc-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+            <div class="reveal-up delay-300 flex flex-col sm:flex-row justify-center gap-4 px-4 sm:px-0">
+                <a href="#pricing" class="w-full sm:w-auto px-8 py-4 bg-white text-black rounded-lg font-bold hover:bg-zinc-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                     Purchase Access
                 </a>
-                <a href="#receipts-section" class="px-8 py-4 border border-white/20 rounded-lg font-medium text-white hover:bg-white/5 transition-colors flex items-center justify-center">
+                <a href="#receipts-section" class="w-full sm:w-auto px-8 py-4 border border-white/20 rounded-lg font-medium text-white hover:bg-white/5 transition-colors flex items-center justify-center">
                     Explore Receipts
                 </a>
                 
-                <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="px-8 py-4 bg-[#5865F2]/10 border border-[#5865F2]/30 text-[#5865F2] rounded-lg font-bold hover:bg-[#5865F2]/20 transition-colors flex items-center justify-center gap-2">
+                <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="w-full sm:w-auto px-8 py-4 bg-[#5865F2]/10 border border-[#5865F2]/30 text-[#5865F2] rounded-lg font-bold hover:bg-[#5865F2]/20 transition-colors flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.09,53,91.08,65.69,84.69,65.69Z"/></svg>
                     Join Discord
                 </a>
             </div>
         </section>
 
-        <section id="how-it-works" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5 reveal">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold tracking-tight mb-4">How it works.</h2>
+        <section id="how-it-works" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
+            <div class="reveal-scale text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">How it works.</h2>
                 <p class="text-zinc-500">From login to your perfect digital receipt in 3 steps.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 relative">
                 <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
-                <div class="text-center z-10">
-                    <div class="w-24 h-24 mx-auto bg-black border border-white/10 rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)]">1</div>
+                <div class="reveal-up delay-100 text-center z-10">
+                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-black border border-white/10 rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)]">1</div>
                     <h3 class="text-xl font-bold mb-2">Connect</h3>
-                    <p class="text-zinc-400 text-sm">Log in securely using your Discord account to link your profile to our dashboard.</p>
+                    <p class="text-zinc-400 text-sm px-4 md:px-0">Log in securely using your Discord account to link your profile to our dashboard.</p>
                 </div>
-                <div class="text-center z-10">
-                    <div class="w-24 h-24 mx-auto bg-black border border-white/10 rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)]">2</div>
+                <div class="reveal-up delay-200 text-center z-10">
+                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-black border border-white/10 rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)]">2</div>
                     <h3 class="text-xl font-bold mb-2">Purchase</h3>
-                    <p class="text-zinc-400 text-sm">Buy access directly on the website to receive your unique activation key or role.</p>
+                    <p class="text-zinc-400 text-sm px-4 md:px-0">Buy access directly on the website to receive your unique activation key or role.</p>
                 </div>
-                <div class="text-center z-10">
-                    <div class="w-24 h-24 mx-auto bg-white text-black rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.2)]">3</div>
+                <div class="reveal-up delay-300 text-center z-10">
+                    <div class="w-20 h-20 md:w-24 md:h-24 mx-auto bg-white text-black rounded-full flex items-center justify-center text-2xl font-black mb-6 shadow-[0_0_30px_rgba(255,255,255,0.2)]">3</div>
                     <h3 class="text-xl font-bold mb-2">Generate</h3>
-                    <p class="text-zinc-400 text-sm">Use our web dashboard or Discord bot to configure your details, and receive the email instantly.</p>
+                    <p class="text-zinc-400 text-sm px-4 md:px-0">Use our web dashboard or Discord bot to configure your details, and receive the email instantly.</p>
                 </div>
             </div>
         </section>
 
-        <section id="receipts-section" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5 reveal">
-            <div class="mb-12 text-center md:text-left">
-                <h2 class="text-4xl font-bold tracking-tight">Select Region.</h2>
+        <section id="receipts-section" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
+            <div class="reveal-left mb-12 text-center md:text-left">
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Select Region.</h2>
                 <p class="text-zinc-500 mt-2">Browse our perfectly matched email categories.</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div onclick="openModal('Hungarian')" class="glass-card glass-card-hover rounded-2xl p-10 cursor-pointer group relative overflow-hidden min-h-[400px] flex flex-col justify-end">
+                <div onclick="openModal('Hungarian')" class="reveal-up delay-100 glass-card glass-card-hover rounded-2xl p-8 md:p-10 cursor-pointer group relative overflow-hidden min-h-[350px] md:min-h-[400px] flex flex-col justify-end">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
                     <div class="absolute top-0 right-0 p-8 text-zinc-800 transition-transform duration-700 group-hover:scale-110 group-hover:text-zinc-700">
-                        <svg class="w-48 h-48 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <svg class="w-32 h-32 md:w-48 md:h-48 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div class="relative z-20">
-                        <h3 class="text-4xl font-black mb-3 text-white">Hungarian</h3>
-                        <p class="text-zinc-300 text-sm max-w-sm leading-relaxed">Domestic formats featuring top local streetwear & sneaker hubs. Perfectly formatted digital order confirmations.</p>
-                        <div class="mt-8 flex items-center text-sm font-bold text-white uppercase tracking-wider bg-white/10 w-fit px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-black transition-colors">
+                        <h3 class="text-3xl md:text-4xl font-black mb-3 text-white">Hungarian</h3>
+                        <p class="text-zinc-300 text-xs md:text-sm max-w-sm leading-relaxed">Domestic formats featuring top local streetwear & sneaker hubs. Perfectly formatted digital order confirmations.</p>
+                        <div class="mt-6 md:mt-8 flex items-center text-xs md:text-sm font-bold text-white uppercase tracking-wider bg-white/10 w-fit px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-black transition-colors">
                             Explore Receipts <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
                         </div>
                     </div>
                 </div>
 
-                <div onclick="openModal('International')" class="glass-card glass-card-hover rounded-2xl p-10 cursor-pointer group relative overflow-hidden min-h-[400px] flex flex-col justify-end">
+                <div onclick="openModal('International')" class="reveal-up delay-200 glass-card glass-card-hover rounded-2xl p-8 md:p-10 cursor-pointer group relative overflow-hidden min-h-[350px] md:min-h-[400px] flex flex-col justify-end">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
                     <div class="absolute top-0 right-0 p-8 text-zinc-800 transition-transform duration-700 group-hover:scale-110 group-hover:text-zinc-700">
-                        <svg class="w-48 h-48 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.25 12h17.5M12 3.25v17.5M12 3.25a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 3.25c2.5 0 5.5 3.5 5.5 8.75s-3 8.75-5.5 8.75-5.5-3.5-5.5-8.75 3-8.75 5.5-8.75Z"></path></svg>
+                        <svg class="w-32 h-32 md:w-48 md:h-48 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3.25 12h17.5M12 3.25v17.5M12 3.25a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19Z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 3.25c2.5 0 5.5 3.5 5.5 8.75s-3 8.75-5.5 8.75-5.5-3.5-5.5-8.75 3-8.75 5.5-8.75Z"></path></svg>
                     </div>
                     <div class="relative z-20">
-                        <h3 class="text-4xl font-black mb-3 text-white">International</h3>
-                        <p class="text-zinc-300 text-sm max-w-sm leading-relaxed">Global brands and exact replicas of worldwide shipping emails. From luxury fashion houses to major verified marketplaces.</p>
-                        <div class="mt-8 flex items-center text-sm font-bold text-white uppercase tracking-wider bg-white/10 w-fit px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-black transition-colors">
+                        <h3 class="text-3xl md:text-4xl font-black mb-3 text-white">International</h3>
+                        <p class="text-zinc-300 text-xs md:text-sm max-w-sm leading-relaxed">Global brands and exact replicas of worldwide shipping emails. From luxury fashion houses to major verified marketplaces.</p>
+                        <div class="mt-6 md:mt-8 flex items-center text-xs md:text-sm font-bold text-white uppercase tracking-wider bg-white/10 w-fit px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-black transition-colors">
                             Explore Receipts <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
                         </div>
                     </div>
@@ -182,14 +228,14 @@
             </div>
         </section>
 
-        <section id="pricing" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5 reveal">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold tracking-tight mb-4">Choose Your Access.</h2>
+        <section id="pricing" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
+            <div class="reveal-scale text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">Choose Your Access.</h2>
                 <p class="text-zinc-500">Secure your license. Instant Discord role assignment after purchase.</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="glass-card rounded-2xl p-8 flex flex-col relative">
+                <div class="reveal-left delay-100 glass-card rounded-2xl p-8 flex flex-col relative">
                     <h3 class="text-2xl font-bold mb-2">Resell Access</h3>
                     <p class="text-zinc-400 text-sm mb-6">Gain access to our exclusive resell course and community.</p>
                     <div class="mb-6">
@@ -204,7 +250,7 @@
                     <button onclick="buyPlan('resell')" class="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors">Purchase via Whop</button>
                 </div>
 
-                <div class="glass-card rounded-2xl p-8 flex flex-col relative border-white/30 transform md:-translate-y-4 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                <div class="reveal-up delay-200 glass-card rounded-2xl p-8 flex flex-col relative border-white/30 transform md:-translate-y-4 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
                     <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-black px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase">Most Popular</div>
                     <h3 class="text-2xl font-bold mb-2">Receipt Access</h3>
                     <p class="text-zinc-400 text-sm mb-6">The ultimate experience with Web Dashboard & Bot access.</p>
@@ -220,7 +266,7 @@
                     <button onclick="buyPlan('receipt')" class="w-full py-3 bg-white text-black rounded-lg font-bold hover:bg-zinc-200 transition-colors">Purchase via Whop</button>
                 </div>
 
-                <div class="glass-card rounded-2xl p-8 flex flex-col relative">
+                <div class="reveal-right delay-300 glass-card rounded-2xl p-8 flex flex-col relative">
                     <h3 class="text-2xl font-bold mb-2 text-amber-400">Premium Access</h3>
                     <p class="text-zinc-400 text-sm mb-6">The all-in-one package. Resell course + Receipt generation.</p>
                     <div class="mb-6">
@@ -246,47 +292,47 @@
     </main>
 
     <div id="receiptModal" class="modal-base fixed inset-0 z-50 bg-black/95 backdrop-blur-xl hidden-modal flex flex-col">
-        <div class="h-20 border-b border-white/10 px-6 flex justify-between items-center bg-black/50">
-            <button onclick="closeModal('receiptModal')" class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-sm group">
+        <div class="h-20 border-b border-white/10 px-4 md:px-6 flex justify-between items-center bg-black/50">
+            <button onclick="closeModal('receiptModal')" class="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-xs md:text-sm group">
                 <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </button>
-            <h2 id="modalTitle" class="text-xl font-bold tracking-tight text-white uppercase">Loading...</h2>
+            <h2 id="modalTitle" class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Loading...</h2>
         </div>
-        <div class="flex-grow p-8 overflow-y-auto">
-            <div id="modalContent" class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        <div class="flex-grow p-4 md:p-8 overflow-y-auto">
+            <div id="modalContent" class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"></div>
         </div>
     </div>
 
     <div id="generatorModal" class="modal-base fixed inset-0 z-[60] bg-black/95 backdrop-blur-xl hidden-modal flex flex-col">
-        <div class="h-20 border-b border-white/10 px-6 flex justify-between items-center bg-black/50">
-            <button onclick="closeGenerator()" class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-sm group">
+        <div class="h-20 border-b border-white/10 px-4 md:px-6 flex justify-between items-center bg-black/50">
+            <button onclick="closeGenerator()" class="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-xs md:text-sm group">
                 <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Templates
             </button>
-            <h2 id="generatorTitle" class="text-xl font-bold tracking-tight text-white uppercase">Generate Receipt</h2>
+            <h2 id="generatorTitle" class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Generate Receipt</h2>
         </div>
 
-        <div class="flex-grow p-8 overflow-y-auto flex justify-center items-start">
-            <div class="glass-card rounded-2xl w-full max-w-3xl p-8 animate-[fadeIn_0.3s_ease-out_forwards]">
-                <div class="mb-8 border-b border-white/10 pb-6 flex justify-between items-end">
+        <div class="flex-grow p-4 md:p-8 overflow-y-auto flex justify-center items-start">
+            <div class="glass-card rounded-2xl w-full max-w-3xl p-6 md:p-8 animate-[fadeIn_0.3s_ease-out_forwards]">
+                <div class="mb-6 md:mb-8 border-b border-white/10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <div>
-                        <h3 class="text-2xl font-bold" id="generatorBrandName">Brand Name</h3>
-                        <p class="text-zinc-400 text-sm mt-1">Variables auto-detected from HTML. Your address, dates, and calculated fields are applied securely in the background.</p>
+                        <h3 class="text-xl md:text-2xl font-bold" id="generatorBrandName">Brand Name</h3>
+                        <p class="text-zinc-400 text-xs md:text-sm mt-1">Variables auto-detected from HTML. Your address, dates, and calculated fields are applied securely in the background.</p>
                     </div>
                 </div>
                 <form id="generatorForm" class="space-y-6" onsubmit="event.preventDefault(); submitGeneration();">
                     <div id="hiddenInputsBox" class="hidden"></div>
-                    <div id="dynamicInputs" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                    <div id="dynamicInputs" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"></div>
                     
-                    <div id="totalPriceBox" class="hidden mt-6 bg-green-900/20 border border-green-500/30 p-6 rounded-lg flex justify-between items-center">
-                        <span class="text-green-400 font-bold tracking-wider uppercase text-sm">Calculated Total</span>
-                        <span id="liveTotalDisplay" class="text-3xl font-black text-white">$0.00</span>
+                    <div id="totalPriceBox" class="hidden mt-6 bg-green-900/20 border border-green-500/30 p-4 md:p-6 rounded-lg flex justify-between items-center">
+                        <span class="text-green-400 font-bold tracking-wider uppercase text-xs md:text-sm">Calculated Total</span>
+                        <span id="liveTotalDisplay" class="text-2xl md:text-3xl font-black text-white">$0.00</span>
                     </div>
 
-                    <div class="pt-6 mt-8 border-t border-white/10 flex justify-end items-center gap-4">
+                    <div class="pt-6 mt-8 border-t border-white/10 flex flex-col md:flex-row justify-end items-center gap-4">
                         <div id="sendStatus" class="text-sm font-bold text-green-400 hidden">✅ Sent to Discord Bot!</div>
-                        <button id="submitBtn" type="submit" class="bg-white text-black px-8 py-3 rounded-lg font-bold hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center gap-2">
+                        <button id="submitBtn" type="submit" class="w-full md:w-auto bg-white text-black px-8 py-3 rounded-lg font-bold hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                             Generate & Send Email
                         </button>
@@ -297,23 +343,23 @@
     </div>
 
     <div id="settingsModal" class="modal-base fixed inset-0 z-[70] bg-black/95 backdrop-blur-xl hidden-modal flex flex-col">
-        <div class="h-20 border-b border-white/10 px-6 flex justify-between items-center bg-black/50">
-            <button onclick="closeSettings()" class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-sm group">
+        <div class="h-20 border-b border-white/10 px-4 md:px-6 flex justify-between items-center bg-black/50">
+            <button onclick="closeSettings()" class="flex items-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium text-xs md:text-sm group">
                 <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Close
             </button>
-            <h2 class="text-xl font-bold tracking-tight text-white uppercase">Profile Settings</h2>
+            <h2 class="text-lg md:text-xl font-bold tracking-tight text-white uppercase">Profile Settings</h2>
         </div>
-        <div class="flex-grow p-8 overflow-y-auto flex justify-center items-start">
-            <div class="glass-card rounded-2xl w-full max-w-2xl p-8 animate-[fadeIn_0.3s_ease-out_forwards]">
-                <div class="mb-6 border-b border-white/10 pb-6 flex justify-between items-end">
+        <div class="flex-grow p-4 md:p-8 overflow-y-auto flex justify-center items-start">
+            <div class="glass-card rounded-2xl w-full max-w-2xl p-6 md:p-8 animate-[fadeIn_0.3s_ease-out_forwards]">
+                <div class="mb-6 border-b border-white/10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                     <div>
-                        <h3 class="text-2xl font-bold">Global Configuration</h3>
-                        <p class="text-zinc-400 text-sm mt-1">Required background data for receipt generation.</p>
+                        <h3 class="text-xl md:text-2xl font-bold">Global Configuration</h3>
+                        <p class="text-zinc-400 text-xs md:text-sm mt-1">Required background data for receipt generation.</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button type="button" onclick="generateSettingsAddress('US')" class="px-3 py-1.5 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded text-xs font-bold transition-colors">Random US</button>
-                        <button type="button" onclick="generateSettingsAddress('HU')" class="px-3 py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded text-xs font-bold transition-colors">Random HU</button>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button type="button" onclick="generateSettingsAddress('US')" class="flex-1 md:flex-none px-3 py-2 md:py-1.5 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded text-xs font-bold transition-colors">Random US</button>
+                        <button type="button" onclick="generateSettingsAddress('HU')" class="flex-1 md:flex-none px-3 py-2 md:py-1.5 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded text-xs font-bold transition-colors">Random HU</button>
                     </div>
                 </div>
                 <form id="settingsForm" class="space-y-4" onsubmit="event.preventDefault(); saveSettings();">
@@ -324,15 +370,15 @@
                     <div><label class="block text-xs font-bold text-white mb-2 uppercase">Street / Address *</label><input type="text" id="set_street" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div><label class="block text-xs font-bold text-white mb-2 uppercase">City *</label><input type="text" id="set_city" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
-                        <div><label class="block text-xs font-bold text-white mb-2 uppercase">Postal Code *</label><input type="text" id="set_postal" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
-                        <div><label class="block text-xs font-bold text-white mb-2 uppercase">Country *</label><input type="text" id="set_country" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
-                        <div><label class="block text-xs font-bold text-white mb-2 uppercase text-amber-400">Card Last 4 *</label><input type="text" id="set_card" required maxlength="4" pattern="[0-9]{4}" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-zinc-600" placeholder="e.g. 4921"></div>
+                        <div class="md:col-span-1"><label class="block text-xs font-bold text-white mb-2 uppercase">City *</label><input type="text" id="set_city" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
+                        <div class="md:col-span-1"><label class="block text-xs font-bold text-white mb-2 uppercase">Postal Code *</label><input type="text" id="set_postal" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
+                        <div class="md:col-span-1"><label class="block text-xs font-bold text-white mb-2 uppercase">Country *</label><input type="text" id="set_country" required class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white"></div>
+                        <div class="md:col-span-1"><label class="block text-xs font-bold text-white mb-2 uppercase text-amber-400">Card Last 4 *</label><input type="text" id="set_card" required maxlength="4" pattern="[0-9]{4}" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-zinc-600" placeholder="e.g. 4921"></div>
                     </div>
                     
                     <div id="settingsAlert" class="hidden text-green-400 text-sm font-bold text-center mt-4">Settings saved successfully!</div>
                     <div class="pt-4 mt-6 border-t border-white/10 flex justify-end">
-                        <button type="submit" class="bg-white text-black px-6 py-2 rounded-lg font-bold hover:bg-zinc-200 transition-colors">Save Settings</button>
+                        <button type="submit" class="w-full md:w-auto bg-white text-black px-6 py-3 md:py-2 rounded-lg font-bold hover:bg-zinc-200 transition-colors">Save Settings</button>
                     </div>
                 </form>
             </div>
@@ -358,6 +404,18 @@
         let currentUser = null; 
         let userPlan = "None";
         let sessionToken = localStorage.getItem('sessionToken') || null;
+
+        // Mobil Menü Nyitó/Záró Funkció
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            if(menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                menu.classList.add('flex');
+            } else {
+                menu.classList.add('hidden');
+                menu.classList.remove('flex');
+            }
+        }
 
         function showCustomAlert(title, message, btnText = "OK", callback = null, isError = false) {
             const modal = document.getElementById('customAlertModal');
@@ -388,40 +446,44 @@
             modal.classList.add('active-modal');
         }
 
+        // Kiterjesztett Reveal Animáció Motor
         function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
+            var reveals = document.querySelectorAll(".reveal, .reveal-up, .reveal-left, .reveal-right, .reveal-scale");
             for (var i = 0; i < reveals.length; i++) {
                 var windowHeight = window.innerHeight;
                 var elementTop = reveals[i].getBoundingClientRect().top;
-                if (elementTop < windowHeight - 100) { reveals[i].classList.add("active"); }
+                // Kisebb threshold, hogy mobilon is könnyen aktiválódjon
+                if (elementTop < windowHeight - 50) { reveals[i].classList.add("active"); }
             }
         }
         window.addEventListener("scroll", reveal);
-        reveal();
+        // Késleltetett első futtatás, hogy a betöltési animációk is végbemenjenek
+        setTimeout(reveal, 100);
 
+        // A képeket (image kulcsot) KIVETTEM a listából, hogy automatikusan generáljuk őket!
         const receiptData = {
             Hungarian: [
-                { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", image: "images/balazskicks.png", file: "BalazsKICKS.html" },
-                { name: "OnSize", status: "Verified", tag: "Sneaker", image: "images/onsize.png", file: "OnSize.html" },
-                { name: "Footshop HU", status: "Verified", tag: "Sneaker", image: "images/footshop.png", file: "FootshopHU.html" },
-                { name: "Nike HU", status: "Verified", tag: "Sportswear", image: "images/nike.png", file: "NikeHU.html" },
-                { name: "Adidas HU", status: "Verified", tag: "Sportswear", image: "images/adidas.png", file: "AdidasHU.html" },
-                { name: "Tiszacipo", status: "Verified", tag: "Local", image: "images/tisza.png", file: "Tisza.html" },
-                { name: "True To Sole", status: "Verified", tag: "Sneaker", image: "images/tts.png", file: "TrueToSole.html" }
+                { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", file: "BalazsKICKS.html" },
+                { name: "OnSize", status: "Verified", tag: "Sneaker", file: "OnSize.html" },
+                { name: "Footshop HU", status: "Verified", tag: "Sneaker", file: "FootshopHU.html" },
+                { name: "Nike HU", status: "Verified", tag: "Sportswear", file: "NikeHU.html" },
+                { name: "Adidas HU", status: "Verified", tag: "Sportswear", file: "AdidasHU.html" },
+                { name: "Tiszacipo", status: "Verified", tag: "Local", file: "Tisza.html" },
+                { name: "True To Sole", status: "Verified", tag: "Sneaker", file: "TrueToSole.html" }
             ],
             International: [
-                { name: "Louis Vuitton", status: "Luxury", tag: "Fashion", image: "images/louisvuitton.png", file: "Louis Vuitton.html" },
-                { name: "StockX", status: "Verified", tag: "Marketplace", image: "images/stockx.png", file: "StockX.html" },
-                { name: "Apple", status: "Tech", tag: "Electronics", image: "images/apple.png", file: "Apple.html" },
-                { name: "Dior", status: "Luxury", tag: "Fashion", image: "images/dior.png", file: "DIOR.html" },
-                { name: "GOAT", status: "Verified", tag: "Marketplace", image: "images/goat.png", file: "GOAT.html" },
-                { name: "Moncler", status: "Luxury", tag: "Fashion", image: "images/moncler.png", file: "MONCLER.html" },
-                { name: "Hermes", status: "Luxury", tag: "Fashion", image: "images/hermes.png", file: "Hermes.html" },
-                { name: "Gucci", status: "Luxury", tag: "Fashion", image: "images/gucci.png", file: "Gucci.html" },
-                { name: "Prada", status: "Luxury", tag: "Fashion", image: "images/prada.png", file: "Prada.html" },
-                { name: "Farfetch", status: "Luxury", tag: "Marketplace", image: "images/farfetch.png", file: "Farfetch.html" },
-                { name: "SSENSE", status: "Luxury", tag: "Marketplace", image: "images/ssense.png", file: "SSENSE.html" },
-                { name: "Grailed", status: "Verified", tag: "Marketplace", image: "images/grailed.png", file: "Grailed.html" }
+                { name: "Louis Vuitton", status: "Luxury", tag: "Fashion", file: "Louis Vuitton.html" },
+                { name: "StockX", status: "Verified", tag: "Marketplace", file: "StockX.html" },
+                { name: "Apple", status: "Tech", tag: "Electronics", file: "Apple.html" },
+                { name: "Dior", status: "Luxury", tag: "Fashion", file: "DIOR.html" },
+                { name: "GOAT", status: "Verified", tag: "Marketplace", file: "GOAT.html" },
+                { name: "Moncler", status: "Luxury", tag: "Fashion", file: "MONCLER.html" },
+                { name: "Hermes", status: "Luxury", tag: "Fashion", file: "Hermes.html" },
+                { name: "Gucci", status: "Luxury", tag: "Fashion", file: "Gucci.html" },
+                { name: "Prada", status: "Luxury", tag: "Fashion", file: "Prada.html" },
+                { name: "Farfetch", status: "Luxury", tag: "Marketplace", file: "Farfetch.html" },
+                { name: "SSENSE", status: "Luxury", tag: "Marketplace", file: "SSENSE.html" },
+                { name: "Grailed", status: "Verified", tag: "Marketplace", file: "Grailed.html" }
             ]
         };
 
@@ -508,14 +570,12 @@
             document.getElementById('modalTitle').textContent = category + " Receipts";
             const modalContent = document.getElementById('modalContent');
             
-            // Töltőképernyő amíg a Vercelen ellenőrzi a fájlokat
             modalContent.innerHTML = '<div class="col-span-full py-10 text-center text-zinc-500 font-bold">Loading available templates...</div>';
             
             document.body.style.overflow = 'hidden'; 
             receiptModal.classList.remove('hidden-modal');
             receiptModal.classList.add('active-modal');
             
-            // Kiszűrjük azokat a sablonokat, amik nincsenek benne az index.html melletti Vercel "templates" mappában
             const validItems = [];
             await Promise.all(receiptData[category].map(async (item) => {
                 try {
@@ -546,20 +606,28 @@
                 if(item.status === "Tech") statusColor = "bg-blue-500/20 text-blue-400";
                 if(item.status === "Verified") statusColor = "bg-green-500/20 text-green-400";
 
+                // KÉP DINAMIKUS BETÖLTÉSE FÁJLNÉV ALAPJÁN (JPG, VAGY HA NINCS, PNG)
+                const baseName = item.file.replace('.html', '');
+                const imgJpg = `images/${baseName}.jpg`;
+                const imgPng = `images/${baseName}.png`;
+                const fallbackImg = `https://via.placeholder.com/400x300/1a1a1a/555555?text=${baseName}`;
+
                 const card = `
                     <div onclick="openGenerator(${index})" class="store-card glass-card rounded-xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]" style="animation-delay: ${Math.random() * 0.2}s">
-                        <div class="h-48 bg-zinc-900/50 flex items-center justify-center relative overflow-hidden">
-                            <img src="${item.image}" alt="${item.name} Preview" class="absolute inset-0 w-full h-full object-contain p-4 opacity-90 group-hover:opacity-30 transition-opacity duration-300" onerror="this.src='https://via.placeholder.com/400x300/1a1a1a/555555?text=No+Image'">
+                        <div class="h-40 md:h-48 bg-zinc-900/50 flex items-center justify-center relative overflow-hidden">
+                            <img src="${imgJpg}" alt="${item.name} Preview" 
+                                 class="absolute inset-0 w-full h-full object-contain p-4 opacity-90 group-hover:opacity-30 transition-opacity duration-300" 
+                                 onerror="this.onerror=null; this.src='${imgPng}'; this.addEventListener('error', () => this.src='${fallbackImg}');">
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-300 flex items-center justify-center backdrop-blur-[2px] opacity-0 group-hover:opacity-100">
-                                <span class="bg-white text-black px-8 py-3 rounded-full text-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                                <span class="bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                                     Generate
                                 </span>
                             </div>
                         </div>
-                        <div class="p-5 flex flex-col flex-grow bg-black/40 relative z-10 border-t border-white/5">
+                        <div class="p-4 md:p-5 flex flex-col flex-grow bg-black/40 relative z-10 border-t border-white/5">
                             <div class="flex justify-between items-start mb-2">
-                                <h4 class="text-lg font-bold text-white tracking-tight">${item.name}</h4>
-                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${statusColor}">
+                                <h4 class="text-base md:text-lg font-bold text-white tracking-tight">${item.name}</h4>
+                                <span class="px-2 py-1 rounded text-[9px] md:text-[10px] font-bold uppercase tracking-wider ${statusColor}">
                                     ${item.status}
                                 </span>
                             </div>
@@ -610,7 +678,6 @@
                     showCustomAlert("Connection Error", "Could not connect to the Backend API. Make sure the Python bot is running on your server!", "Close", null, true);
                 }
             } else if (sessionToken) {
-                // AUTO-LOGIN: Ha van már elmentett tokenünk, leellenőrizzük
                 try {
                     const response = await fetch(`${API_BASE_URL}/user_info`, {
                         method: 'POST',
@@ -635,19 +702,27 @@
         };
 
         function updateAuthUI() {
-            const authArea = document.getElementById('userAuthArea');
+            const authAreaDesktop = document.getElementById('userAuthAreaDesktop');
+            const authAreaMobile = document.getElementById('userAuthAreaMobile');
+            const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+            
             if (!currentUser) return; 
 
             let badgeColor = userPlan === 'Premium' ? 'text-amber-400 bg-amber-500/20' : (userPlan === 'Receipt' ? 'text-green-400 bg-green-500/20' : 'text-zinc-300 bg-zinc-800');
-            authArea.innerHTML = `
+            
+            const htmlContent = `
                 <div class="flex items-center gap-3">
-                    <div class="flex flex-col items-end">
+                    <div class="flex flex-col items-end hidden md:flex">
                         <span class="text-sm font-bold text-white">${currentUser.username}</span>
                         <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded ${badgeColor}">${userPlan} Plan</span>
                     </div>
-                    <img src="https://cdn.discordapp.com/avatars/${currentUser.id}/${currentUser.avatar}.png" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-white/20">
+                    <img src="https://cdn.discordapp.com/avatars/${currentUser.id}/${currentUser.avatar}.png" alt="Avatar" class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white/20">
                 </div>
             `;
+            
+            authAreaDesktop.innerHTML = htmlContent;
+            authAreaMobile.innerHTML = htmlContent;
+            if(mobileLoginBtn) mobileLoginBtn.style.display = 'none';
         }
 
         // ================= DINAMIKUS GENERÁLÓ =================
