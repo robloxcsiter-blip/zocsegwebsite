@@ -419,14 +419,74 @@
             <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="text-2xl font-extrabold tracking-tighter text-white opacity-40 hover:opacity-100 transition-opacity cursor-default">receipt.er</div>
                 <div class="flex gap-6">
-                    <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="text-zinc-500 hover:text-white transition-colors">Discord</a>
-                    <a href="#" class="text-zinc-500 hover:text-white transition-colors">Terms of Service</a>
-                    <a href="#" class="text-zinc-500 hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="https://discord.gg/XaafBJt4HM" target="_blank" class="text-zinc-500 hover:text-white transition-colors font-medium">Discord</a>
+                    <a href="#" onclick="openTos(); return false;" class="text-zinc-500 hover:text-white transition-colors font-medium">Terms of Service</a>
+                    <a href="#" onclick="openPrivacy(); return false;" class="text-zinc-500 hover:text-white transition-colors font-medium">Privacy Policy</a>
                 </div>
-                <p class="text-zinc-600 text-xs md:text-sm font-medium tracking-widest">&copy; 2026. ENGINEERED FOR PERFECTION.</p>
+                <p class="text-zinc-600 text-xs md:text-sm font-medium tracking-widest">&copy; 2026. receipt.er ALL RIGHTS RESERVED.</p>
             </div>
         </footer>
     </main>
+
+    <div id="tosModal" class="modal-base fixed inset-0 z-[80] bg-black/95 backdrop-blur-2xl hidden-modal flex flex-col items-center justify-center p-4">
+        <div class="glass-card rounded-[2rem] w-full max-w-3xl p-8 md:p-12 relative overflow-hidden flex flex-col max-h-[90vh] shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-6">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Terms of Service</h2>
+                    <p class="text-zinc-500 text-sm mt-1">Last updated: January 2026</p>
+                </div>
+                <button onclick="closeTos()" class="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="overflow-y-auto pr-4 space-y-6 text-zinc-300 text-sm md:text-base leading-relaxed flex-grow custom-scrollbar">
+                <p>Welcome to receipt.er. By accessing our website, joining our Discord server, or purchasing any of our digital products, you agree to be bound by the following terms.</p>
+                
+                <h3 class="text-white font-bold text-lg mt-4">1. Use of Service</h3>
+                <p>Our service provides digital HTML/Email receipt templates and a web-based/Discord generation tool. These tools are provided strictly "as-is" for novelty, educational, or personal record-keeping purposes only.</p>
+                
+                <div class="bg-red-500/10 border border-red-500/30 p-6 rounded-xl">
+                    <h3 class="text-red-400 font-black text-lg mb-2 uppercase tracking-wide">2. No Liability & Responsibility</h3>
+                    <p class="text-red-200 text-sm">We take absolutely <strong>no responsibility</strong> for the actions of our users or what you do with the generated receipts. We are not liable for any disputes, transactions, bans, or issues that occur between you and your buyers, sellers, marketplaces, or any third parties. By using this tool, you acknowledge that you are solely responsible for your actions and you use this service entirely at your own risk.</p>
+                </div>
+
+                <div class="bg-amber-500/10 border border-amber-500/30 p-6 rounded-xl">
+                    <h3 class="text-amber-400 font-black text-lg mb-2 uppercase tracking-wide">3. Strict No Refund Policy</h3>
+                    <p class="text-amber-200 text-sm">All purchases made through Whop, SellAuth, or any other platform for our roles, courses, and access keys are <strong>100% final</strong>. Because you gain immediate access to our digital goods, automated tools, and exclusive Discord community upon purchase, <strong>we do not offer refunds under any circumstances</strong>. Filing a chargeback or dispute will result in an immediate, permanent ban from all our services.</p>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-white/10 flex justify-end">
+                <button onclick="closeTos()" class="bg-white text-black px-10 py-4 rounded-xl font-black text-lg hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95">I Understand & Agree</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="privacyModal" class="modal-base fixed inset-0 z-[80] bg-black/95 backdrop-blur-2xl hidden-modal flex flex-col items-center justify-center p-4">
+        <div class="glass-card rounded-[2rem] w-full max-w-3xl p-8 md:p-12 relative overflow-hidden flex flex-col max-h-[90vh] shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-6">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Privacy Policy</h2>
+                    <p class="text-zinc-500 text-sm mt-1">Your data and how we handle it.</p>
+                </div>
+                <button onclick="closePrivacy()" class="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="overflow-y-auto pr-4 space-y-6 text-zinc-300 text-sm md:text-base leading-relaxed flex-grow custom-scrollbar">
+                <h3 class="text-white font-bold text-lg mt-4">1. Information We Collect</h3>
+                <p>When you log in via Discord OAuth2, we only receive your public Discord ID, username, and avatar to verify your active subscription status. We do not have access to your passwords or private Discord messages.</p>
+                
+                <h3 class="text-white font-bold text-lg mt-4">2. Local Data Storage</h3>
+                <p>The billing and shipping information you enter in the "Settings" panel (Name, Address, City, etc.) is securely saved in your browser's <strong>Local Storage</strong>. It is only sent to our Python backend server at the exact moment you click "Generate" to compile the email. We do not store this personal data in any permanent database.</p>
+                
+                <h3 class="text-white font-bold text-lg mt-4">3. Acknowledgment</h3>
+                <p>By using our service, you acknowledge that we are not responsible for the actions of our users (as stated in the Terms of Service), and that due to the nature of digital goods, there are no refunds provided.</p>
+            </div>
+            <div class="mt-8 pt-6 border-t border-white/10 flex justify-end">
+                <button onclick="closePrivacy()" class="bg-white text-black px-10 py-4 rounded-xl font-black text-lg hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95">Close Policy</button>
+            </div>
+        </div>
+    </div>
 
     <div id="receiptModal" class="modal-base fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl hidden-modal flex flex-col">
         <div class="h-20 border-b border-white/10 px-4 md:px-8 flex justify-between items-center bg-black/60 shadow-lg">
@@ -590,6 +650,35 @@
         let userPlan = "None";
         let sessionToken = localStorage.getItem('sessionToken') || null;
 
+        // JOGI ABLAKOK MEGYITÁSA (TOS / Privacy)
+        function openTos() {
+            document.body.style.overflow = 'hidden';
+            const modal = document.getElementById('tosModal');
+            modal.classList.remove('hidden-modal');
+            modal.classList.add('active-modal');
+        }
+        
+        function closeTos() {
+            const modal = document.getElementById('tosModal');
+            modal.classList.remove('active-modal');
+            modal.classList.add('hidden-modal');
+            document.body.style.overflow = '';
+        }
+        
+        function openPrivacy() {
+            document.body.style.overflow = 'hidden';
+            const modal = document.getElementById('privacyModal');
+            modal.classList.remove('hidden-modal');
+            modal.classList.add('active-modal');
+        }
+        
+        function closePrivacy() {
+            const modal = document.getElementById('privacyModal');
+            modal.classList.remove('active-modal');
+            modal.classList.add('hidden-modal');
+            document.body.style.overflow = '';
+        }
+
         // MOBIL MENÜ HAMBURGER LOGIKA
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
@@ -655,7 +744,75 @@
         }
 
         // ==========================================================================
-        // ADATBÁZIS: Kézzel beírt, PONTOS .png fájlnevekkel
+        // BIZTONSÁGOS GITHUB KÉP HIBAKEZELŐ (5 FALLBACK LÉPÉS)
+        // ==========================================================================
+        function handleImageError(imgElement, baseName) {
+            if (!imgElement.dataset.triedGithubRaw) {
+                // 2. Lépés: GitHub Raw PNG a te pontos repódból
+                imgElement.dataset.triedGithubRaw = "true";
+                imgElement.src = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${baseName}`;
+            } else if (!imgElement.dataset.triedGithubJpg) {
+                // 3. Lépés: GitHub Raw JPG (Ha valaki jpg-t tenne fel)
+                imgElement.dataset.triedGithubJpg = "true";
+                const jpgName = baseName.replace('.png', '.jpg');
+                imgElement.src = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${jpgName}`;
+            } else if (!imgElement.dataset.triedLocalPngAlt) {
+                // 4. Lépés: Lokális PNG
+                imgElement.dataset.triedLocalPngAlt = "true";
+                imgElement.src = `images/${baseName}`;
+            } else if (!imgElement.dataset.triedPlaceholder) {
+                // 5. Lépés: Sötét helyőrző kép
+                imgElement.dataset.triedPlaceholder = "true";
+                imgElement.src = `https://via.placeholder.com/400x300/111111/555555?text=Image+Not+Found`;
+            }
+        }
+
+        // ==========================================================================
+        // ÚJ: ODA-VISSZA INTERSECTION OBSERVER ANIMÁCIÓS MOTOR
+        // ==========================================================================
+        document.addEventListener("DOMContentLoaded", () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Ha a képernyőre kerül, rátesszük az active classt
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    } else {
+                        // KÉRÉSRE JAVÍTVA: Ha kikerül a képernyőről, levesszük, így újra aktiválódhat!
+                        entry.target.classList.remove('active');
+                    }
+                });
+            }, observerOptions);
+            
+            const revealElements = document.querySelectorAll('.reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom');
+            revealElements.forEach(el => observer.observe(el));
+        });
+
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementBottom = reveals[i].getBoundingClientRect().bottom;
+                
+                // JAVÍTVA: Csak akkor aktív, ha ténylegesen a képernyőn van
+                if (elementTop < windowHeight - 50 && elementBottom > 0) { 
+                    reveals[i].classList.add("active"); 
+                } else {
+                    reveals[i].classList.remove("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        setTimeout(reveal, 100);
+
+        // ==========================================================================
+        // ADATBÁZIS: A pontos ".png" képnevekkel beállítva
         // ==========================================================================
         const receiptData = {
             Hungarian: [
@@ -691,40 +848,6 @@
         let currentCategoryData = [];
         let currentRegion = "";
         let userSettings = JSON.parse(localStorage.getItem('receiptSettings')) || null;
-
-        // ==========================================================================
-        // INTERSECTION OBSERVER ANIMÁCIÓS MOTOR
-        // ==========================================================================
-        document.addEventListener("DOMContentLoaded", () => {
-            const observerOptions = {
-                root: null,
-                rootMargin: '0px',
-                threshold: 0.15 
-            };
-
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-            
-            const revealElements = document.querySelectorAll('.reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom');
-            revealElements.forEach(el => observer.observe(el));
-        });
-
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal-fade, .reveal-slide-up, .reveal-slide-left, .reveal-slide-right, .reveal-zoom");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                if (elementTop < windowHeight - 50) { reveals[i].classList.add("active"); }
-            }
-        }
-        window.addEventListener("scroll", reveal);
-        setTimeout(reveal, 100);
 
         // ==========================================================================
         // BEÁLLÍTÁSOK KEZELÉSE (USER SETTINGS)
@@ -859,17 +982,17 @@
                 if(item.status === "Tech") statusColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
                 if(item.status === "Verified") statusColor = "bg-green-500/10 text-green-400 border-green-500/20";
 
-                // ÚJ KÉPBETÖLTÉSI LOGIKA: Közvetlenül a Githubról olvassuk a PNG-t!
-                const githubUrl = `https://raw.githubusercontent.com/robloxcsiter-blip/zocsegwebsite/main/images/${item.image}`;
-                const fallbackUrl = `https://via.placeholder.com/400x300/111111/555555?text=${encodeURIComponent(item.name)}`;
+                // ÚJ KÉPBETÖLTÉSI LOGIKA KÖZVETLENÜL GITHUBRÓL
+                // Első körben megpróbálja a helyi images/név.png fájlt
+                const initialUrl = `images/${item.image}`;
 
                 const card = `
                     <div onclick="openGenerator(${index})" class="store-card glass-card rounded-2xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]" style="animation-delay: ${index * 0.05}s">
                         <div class="h-40 md:h-48 bg-black/60 flex items-center justify-center relative overflow-hidden">
-                            <img src="${githubUrl}" 
+                            <img src="${initialUrl}" 
                                  alt="${item.name} Receipt Preview" 
                                  class="absolute inset-0 w-full h-full object-contain p-6 opacity-80 group-hover:opacity-20 transition-opacity duration-500 group-hover:scale-105" 
-                                 onerror="this.onerror=null; this.src='${fallbackUrl}';">
+                                 onerror="handleImageError(this, '${item.image}')">
                                  
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-colors duration-500 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100">
                                 <span class="bg-white text-black px-6 py-2 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-black uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.4)]">
