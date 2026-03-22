@@ -502,7 +502,7 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-1 border border-white/10 hover:border-white/20 transition-all">
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-1 border border-white/10 hover:border-white/20 transition-all flex flex-col h-full">
                     <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
                     <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"Literally 1:1 quality. Used the Louis Vuitton template and the buyer didn't even ask a single question. Saved me hours of manual editing."</p>
                     <div class="flex items-center gap-3 mt-auto">
@@ -514,7 +514,7 @@
                     </div>
                 </div>
                 
-                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-2 border border-white/10 hover:border-white/20 transition-all">
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-2 border border-white/10 hover:border-white/20 transition-all flex flex-col h-full">
                     <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
                     <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"The StockX template is insane. The math calculation feature is a lifesaver, I don't have to calculate taxes and processing fees manually anymore."</p>
                     <div class="flex items-center gap-3 mt-auto">
@@ -526,7 +526,7 @@
                     </div>
                 </div>
                 
-                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-3 border border-white/10 hover:border-white/20 transition-all">
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-3 border border-white/10 hover:border-white/20 transition-all flex flex-col h-full">
                     <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
                     <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"Bought the Premium Access. The UI is insanely fast and the emails hit the inbox instantly. Easily the best investment for my resell business."</p>
                     <div class="flex items-center gap-3 mt-auto">
@@ -538,7 +538,7 @@
                     </div>
                 </div>
 
-                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-1 border border-white/10 hover:border-white/20 transition-all">
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-1 border border-white/10 hover:border-white/20 transition-all flex flex-col h-full">
                     <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
                     <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"Bro, the Apple template is crazy good. Got my old iPhone sold in like 10 minutes because the receipt looked so legit. Highly recommend."</p>
                     <div class="flex items-center gap-3 mt-auto">
@@ -550,7 +550,7 @@
                     </div>
                 </div>
 
-                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-2 border border-white/10 hover:border-white/20 transition-all">
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-2 border border-white/10 hover:border-white/20 transition-all flex flex-col h-full">
                     <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
                     <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"Never had an issue with payouts since I started using this tool. The Discord bot integration makes it super easy to generate on my phone."</p>
                     <div class="flex items-center gap-3 mt-auto">
@@ -562,7 +562,7 @@
                     </div>
                 </div>
 
-                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-3 border border-white/10 hover:border-white/20 transition-all">
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-3 border border-white/10 hover:border-white/20 transition-all flex flex-col h-full">
                     <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
                     <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"The Farfetch and SSENSE templates are flawless. Formatting, fonts, everything is exactly 1:1. Support is also super fast when I had a question."</p>
                     <div class="flex items-center gap-3 mt-auto">
@@ -812,37 +812,41 @@
         let sessionToken = localStorage.getItem('sessionToken') || null;
 
         // ==========================================================================
-        // ÚJ: ZERO-LAG CUSTOM CURSOR LOGIKA
+        // ÚJ: ZERO-LAG CUSTOM CURSOR LOGIKA (EVENT DELEGATION FIX)
         // ==========================================================================
+        let cursorX = window.innerWidth / 2;
+        let cursorY = window.innerHeight / 2;
         const customCursor = document.getElementById('custom-cursor');
-        
-        // Csak akkor fut le a kurzor követés, ha nem mobilon vagyunk (hogy ne egye a teljesítményt a telefonon)
+
+        const isInteractive = (el) => {
+            // Ellenőrzi, hogy az elem vagy a szülője interaktív-e
+            return el && el.closest('a, button, input, select, textarea, .cursor-pointer, .interactive-element, .store-card, .glass-card-hover');
+        };
+
         if (window.innerWidth > 768) {
+            // Frissítjük a pozíciót és az állapotot egérmozgáskor
             document.addEventListener('mousemove', (e) => {
-                // Közvetlenül módosítjuk a pozíciót, nincs CSS transition, így azonnal tapad az egérhez!
-                customCursor.style.left = e.clientX + 'px';
-                customCursor.style.top = e.clientY + 'px';
+                cursorX = e.clientX;
+                cursorY = e.clientY;
+                customCursor.style.left = cursorX + 'px';
+                customCursor.style.top = cursorY + 'px';
+                
+                if (isInteractive(e.target)) {
+                    customCursor.classList.add('expand-hover');
+                } else {
+                    customCursor.classList.remove('expand-hover');
+                }
             });
 
-            // Hover effekt: minden interaktív elemen a pötty megnő
-            const addHoverEffect = () => {
-                const interactiveElements = document.querySelectorAll('a, button, input, select, textarea, .cursor-pointer, .interactive-element, .store-card, .glass-card-hover');
-                
-                interactiveElements.forEach(el => {
-                    // Biztosítjuk, hogy ne tegyünk rá dupla event listenert
-                    if(!el.dataset.cursorBound) {
-                        el.dataset.cursorBound = "true";
-                        el.addEventListener('mouseenter', () => customCursor.classList.add('expand-hover'));
-                        el.addEventListener('mouseleave', () => customCursor.classList.remove('expand-hover'));
-                    }
-                });
-            };
-
-            // Lefuttatjuk az első betöltésnél
-            document.addEventListener('DOMContentLoaded', addHoverEffect);
-            // Lefuttatjuk, amikor megnyílik egy új ablak (hogy a friss elemek is megkapják az animációt)
-            const observer = new MutationObserver(() => addHoverEffect());
-            observer.observe(document.body, { childList: true, subtree: true });
+            // Frissítjük az állapotot görgetéskor (megakadályozza a beragadást)
+            document.addEventListener('scroll', () => {
+                const elUnderCursor = document.elementFromPoint(cursorX, cursorY);
+                if (isInteractive(elUnderCursor)) {
+                    customCursor.classList.add('expand-hover');
+                } else {
+                    customCursor.classList.remove('expand-hover');
+                }
+            }, { passive: true });
         }
 
         // JOGI ABLAKOK MEGYITÁSA (TOS / Privacy)
@@ -1182,7 +1186,7 @@
                 const initialUrl = `images/${item.image}`;
 
                 const card = `
-                    <div onclick="openGenerator(${index})" class="store-card glass-card rounded-2xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]" style="animation-delay: ${index * 0.05}s">
+                    <div onclick="openGenerator(${index})" class="store-card glass-card rounded-2xl overflow-hidden cursor-pointer border border-white/10 group flex flex-col h-full opacity-0 animate-[fadeIn_0.6s_ease-out_forwards] interactive-element" style="animation-delay: ${index * 0.05}s">
                         <div class="h-40 md:h-48 bg-black/60 flex items-center justify-center relative overflow-hidden">
                             <img src="${initialUrl}" 
                                  alt="${item.name} Receipt Preview" 
