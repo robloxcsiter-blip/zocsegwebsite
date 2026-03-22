@@ -213,14 +213,14 @@
             border-radius: 50%;
             pointer-events: none;
             z-index: 999999;
-            transform: translate(-50%, -50%);
-            /* Csak a forma változik animálva, a pozíció késés nélküli! */
-            transition: border-radius 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform: translate(-50%, -50%) scale(1);
+            /* A méret (scale) változik animálva, a pozíció (top/left) késés nélküli! */
+            transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             mix-blend-mode: difference;
         }
         
-        #custom-cursor.square-hover {
-            border-radius: 2px; /* Négyzettesé teszi a pöttyöt */
+        #custom-cursor.expand-hover {
+            transform: translate(-50%, -50%) scale(2.5); /* Megnő a pötty */
         }
         
         /* Mobilon eltüntetjük a custom kurzort */
@@ -342,30 +342,26 @@
             
             <div class="flex w-max animate-marquee">
                 <div class="flex items-center gap-12 md:gap-24 px-6 md:px-12 text-xl md:text-3xl font-black text-zinc-500 uppercase tracking-widest opacity-60">
-                    <span>StockX</span>
+                    <span>BalazsKICKS</span>
+                    <span>Onsize</span>
+                    <span>Farfetch</span>
                     <span>GOAT</span>
+                    <span>StockX</span>
+                    <span>Moncler</span>
                     <span>Louis Vuitton</span>
                     <span>Dior</span>
                     <span>Apple</span>
-                    <span>Gucci</span>
-                    <span>Prada</span>
-                    <span>Moncler</span>
-                    <span>Farfetch</span>
-                    <span>Hermes</span>
-                    <span>SSENSE</span>
                 </div>
                 <div class="flex items-center gap-12 md:gap-24 px-6 md:px-12 text-xl md:text-3xl font-black text-zinc-500 uppercase tracking-widest opacity-60">
-                    <span>StockX</span>
+                    <span>BalazsKICKS</span>
+                    <span>Onsize</span>
+                    <span>Farfetch</span>
                     <span>GOAT</span>
+                    <span>StockX</span>
+                    <span>Moncler</span>
                     <span>Louis Vuitton</span>
                     <span>Dior</span>
                     <span>Apple</span>
-                    <span>Gucci</span>
-                    <span>Prada</span>
-                    <span>Moncler</span>
-                    <span>Farfetch</span>
-                    <span>Hermes</span>
-                    <span>SSENSE</span>
                 </div>
             </div>
         </div>
@@ -541,6 +537,42 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-1 border border-white/10 hover:border-white/20 transition-all">
+                    <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
+                    <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"Bro, the Apple template is crazy good. Got my old iPhone sold in like 10 minutes because the receipt looked so legit. Highly recommend."</p>
+                    <div class="flex items-center gap-3 mt-auto">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold shadow-inner border border-blue-500/30">T</div>
+                        <div>
+                            <div class="text-white font-bold text-sm tracking-wide">tech_flipper</div>
+                            <div class="text-zinc-500 text-xs mt-0.5">Generated: Apple</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-2 border border-white/10 hover:border-white/20 transition-all">
+                    <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
+                    <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"Never had an issue with payouts since I started using this tool. The Discord bot integration makes it super easy to generate on my phone."</p>
+                    <div class="flex items-center gap-3 mt-auto">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold shadow-inner border border-amber-500/30">S</div>
+                        <div>
+                            <div class="text-white font-bold text-sm tracking-wide">sneaker_don</div>
+                            <div class="text-zinc-500 text-xs mt-0.5">Plan: Receipt Access</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 md:p-8 reveal-slide-up stagger-3 border border-white/10 hover:border-white/20 transition-all">
+                    <div class="flex text-amber-400 mb-4 text-lg">★★★★★</div>
+                    <p class="text-zinc-300 mb-6 font-medium leading-relaxed italic">"The Farfetch and SSENSE templates are flawless. Formatting, fonts, everything is exactly 1:1. Support is also super fast when I had a question."</p>
+                    <div class="flex items-center gap-3 mt-auto">
+                        <div class="w-10 h-10 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold shadow-inner border border-red-500/30">E</div>
+                        <div>
+                            <div class="text-white font-bold text-sm tracking-wide">elitetrading</div>
+                            <div class="text-zinc-500 text-xs mt-0.5">Generated: Farfetch</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
         
@@ -712,35 +744,35 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <div>
                             <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">Delivery Email Address *</label>
-                            <input type="email" id="set_email" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="where.to.send@gmail.com">
+                            <input type="email" id="set_email" required class="interactive-element w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="where.to.send@gmail.com">
                         </div>
                         <div>
                             <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">Full Customer Name *</label>
-                            <input type="text" id="set_name" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="John Doe">
+                            <input type="text" id="set_name" required class="interactive-element w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="John Doe">
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">Street / Address Line *</label>
-                        <input type="text" id="set_street" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="123 Hypebeast Street, Apt 4B">
+                        <input type="text" id="set_street" required class="interactive-element w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="123 Hypebeast Street, Apt 4B">
                     </div>
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                         <div class="col-span-2 md:col-span-1">
                             <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">City *</label>
-                            <input type="text" id="set_city" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="Los Angeles">
+                            <input type="text" id="set_city" required class="interactive-element w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="Los Angeles">
                         </div>
                         <div class="col-span-1 md:col-span-1">
                             <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">ZIP / Postal *</label>
-                            <input type="text" id="set_postal" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="90001">
+                            <input type="text" id="set_postal" required class="interactive-element w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="90001">
                         </div>
                         <div class="col-span-1 md:col-span-1">
                             <label class="block text-xs md:text-sm font-bold text-zinc-400 mb-2 uppercase tracking-widest">Country *</label>
-                            <input type="text" id="set_country" required class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="USA">
+                            <input type="text" id="set_country" required class="interactive-element w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white font-medium focus:border-[#5865F2] focus:ring-1 focus:ring-[#5865F2] transition-all outline-none" placeholder="USA">
                         </div>
                         <div class="col-span-2 md:col-span-1">
                             <label class="block text-xs md:text-sm font-black text-amber-400 mb-2 uppercase tracking-widest drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]">Card Last 4 *</label>
-                            <input type="text" id="set_card" required maxlength="4" pattern="[0-9]{4}" class="w-full bg-black/60 border border-amber-500/30 rounded-xl px-5 py-4 text-white font-bold focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all outline-none placeholder-zinc-600 text-center tracking-[0.3em]" placeholder="4921">
+                            <input type="text" id="set_card" required maxlength="4" pattern="[0-9]{4}" class="interactive-element w-full bg-black/60 border border-amber-500/30 rounded-xl px-5 py-4 text-white font-bold focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all outline-none placeholder-zinc-600 text-center tracking-[0.3em]" placeholder="4921">
                         </div>
                     </div>
                     
@@ -792,7 +824,7 @@
                 customCursor.style.top = e.clientY + 'px';
             });
 
-            // Hover effekt: minden interaktív elemen négyzetté válik a pötty
+            // Hover effekt: minden interaktív elemen a pötty megnő
             const addHoverEffect = () => {
                 const interactiveElements = document.querySelectorAll('a, button, input, select, textarea, .cursor-pointer, .interactive-element, .store-card, .glass-card-hover');
                 
@@ -800,8 +832,8 @@
                     // Biztosítjuk, hogy ne tegyünk rá dupla event listenert
                     if(!el.dataset.cursorBound) {
                         el.dataset.cursorBound = "true";
-                        el.addEventListener('mouseenter', () => customCursor.classList.add('square-hover'));
-                        el.addEventListener('mouseleave', () => customCursor.classList.remove('square-hover'));
+                        el.addEventListener('mouseenter', () => customCursor.classList.add('expand-hover'));
+                        el.addEventListener('mouseleave', () => customCursor.classList.remove('expand-hover'));
                     }
                 });
             };
