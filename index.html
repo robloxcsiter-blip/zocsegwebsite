@@ -28,6 +28,13 @@
             overflow-x: hidden; /* Ne lehessen oldalra görgetni mobilon */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            
+            /* Anti-select a biztonságért */
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         /* --- EGYEDI KURZOR ELREJTÉSE AZ EGÉSZ OLDALON --- */
@@ -214,7 +221,6 @@
             pointer-events: none;
             z-index: 999999;
             transform: translate(-50%, -50%) scale(1);
-            /* A méret (scale) változik animálva, a pozíció (top/left) késés nélküli! */
             transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             mix-blend-mode: difference;
         }
@@ -233,7 +239,7 @@
     </style>
 </head>
 
-<body class="antialiased selection:bg-white selection:text-black flex flex-col min-h-screen relative">
+<body class="antialiased selection:bg-white selection:text-black flex flex-col min-h-screen relative" oncontextmenu="return false;">
 
     <div id="custom-cursor"></div>
 
@@ -545,7 +551,7 @@
                         <div class="w-10 h-10 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center font-bold shadow-inner border border-green-500/30">T</div>
                         <div>
                             <div class="text-white font-bold text-sm tracking-wide">Thomas</div>
-                            <div class="text-zinc-500 text-xs mt-0.5">Plan: Receipt Access</div>
+                            <div class="text-zinc-500 text-xs mt-0.5">Plan: Premium Access</div>
                         </div>
                     </div>
                 </div>
@@ -922,6 +928,34 @@
             }, { passive: true });
         }
 
+        // ANTI-INSPECT BIZTONSÁGI SCRIPT
+        // Jobb klikk tiltása
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        
+        // F12 és többi fejlesztői gomb tiltása
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) { // F12
+                return false; 
+            } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { // Ctrl+Shift+I
+                return false; 
+            } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { // Ctrl+Shift+C
+                return false; 
+            } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { // Ctrl+Shift+J
+                return false; 
+            } 
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { // Ctrl+U (View Source)
+                return false; 
+            }
+        };
+
+        // Debugger trap (Megállítja a böngészőt, ha mégis kinyitják a konzolt)
+        setInterval(() => {
+            (function() { return false; }['constructor']('debugger')());
+        }, 100);
+
         // JOGI ABLAKOK MEGYITÁSA (TOS / Privacy)
         function openTos() {
             document.body.style.overflow = 'hidden';
@@ -1089,12 +1123,7 @@
         const receiptData = {
             Hungarian: [
                 { name: "BalazsKICKS", status: "Verified", tag: "Sneaker", image: "balazskicks.png", file: "BalazsKICKS.html" },
-                { name: "OnSize", status: "Verified", tag: "Sneaker", image: "onsize.png", file: "OnSize.html" },
-                { name: "Footshop HU", status: "Verified", tag: "Sneaker", image: "footshop.png", file: "FootshopHU.html" },
-                { name: "Nike HU", status: "Verified", tag: "Sportswear", image: "nike.png", file: "NikeHU.html" },
-                { name: "Adidas HU", status: "Verified", tag: "Sportswear", image: "adidas.png", file: "AdidasHU.html" },
-                { name: "Tiszacipo", status: "Verified", tag: "Local", image: "tisza.png", file: "Tisza.html" },
-                { name: "True To Sole", status: "Verified", tag: "Sneaker", image: "tts.png", file: "TrueToSole.html" }
+                { name: "OnSize", status: "Verified", tag: "Sneaker", image: "onsize.png", file: "OnSize.html" }
             ],
             International: [
                 { name: "Louis Vuitton", status: "Luxury", tag: "Fashion", image: "louisvuitton.png", file: "Louis Vuitton.html" },
@@ -1102,13 +1131,7 @@
                 { name: "Apple", status: "Tech", tag: "Electronics", image: "apple.png", file: "Apple.html" },
                 { name: "Dior", status: "Luxury", tag: "Fashion", image: "dior.png", file: "DIOR.html" },
                 { name: "GOAT", status: "Verified", tag: "Marketplace", image: "goat.png", file: "GOAT.html" },
-                { name: "Moncler", status: "Luxury", tag: "Fashion", image: "moncler.png", file: "MONCLER.html" },
-                { name: "Hermes", status: "Luxury", tag: "Fashion", image: "hermes.png", file: "Hermes.html" },
-                { name: "Gucci", status: "Luxury", tag: "Fashion", image: "gucci.png", file: "Gucci.html" },
-                { name: "Prada", status: "Luxury", tag: "Fashion", image: "prada.png", file: "Prada.html" },
-                { name: "Farfetch", status: "Luxury", tag: "Marketplace", image: "farfetch.png", file: "Farfetch.html" },
-                { name: "SSENSE", status: "Luxury", tag: "Marketplace", image: "ssense.png", file: "SSENSE.html" },
-                { name: "Grailed", status: "Verified", tag: "Marketplace", image: "grailed.png", file: "Grailed.html" }
+                { name: "Moncler", status: "Luxury", tag: "Fashion", image: "moncler.png", file: "MONCLER.html" }
             ]
         };
 
@@ -1219,15 +1242,10 @@
             receiptModal.classList.add('active-modal');
             
             const validItems = [];
+            // BIZTONSÁGOS: a JS már csak vizuális célokra kéri le a headert, vagy ezt is ki lehet szedni a jövőben. 
+            // A template adatokat keményen be kell majd drótozni, ha nem a szerverről jönnek.
             await Promise.all(receiptData[category].map(async (item) => {
-                try {
-                    const response = await fetch(`templates/${item.file}`, { method: 'HEAD' });
-                    if (response.ok) {
-                        validItems.push(item);
-                    }
-                } catch (err) {
-                    console.error("Template check failed:", err);
-                }
+                validItems.push(item);
             }));
 
             const sortedData = validItems.sort((a, b) => {
@@ -1241,8 +1259,7 @@
                 modalContent.innerHTML = `
                     <div class="col-span-full py-20 flex flex-col items-center justify-center gap-4 text-center">
                         <svg class="w-16 h-16 text-zinc-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span class="text-zinc-400 font-bold text-lg">No available templates found in the physical folder.</span>
-                        <span class="text-zinc-600 text-sm">Please upload the HTML files to the 'templates' directory on your server.</span>
+                        <span class="text-zinc-400 font-bold text-lg">No available templates found.</span>
                     </div>
                 `;
             }
@@ -1254,8 +1271,6 @@
                 if(item.status === "Tech") statusColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
                 if(item.status === "Verified") statusColor = "bg-green-500/10 text-green-400 border-green-500/20";
 
-                // ÚJ KÉPBETÖLTÉSI LOGIKA KÖZVETLENÜL GITHUBRÓL
-                // Első körben megpróbálja a helyi images/név.png fájlt
                 const initialUrl = `images/${item.image}`;
 
                 const card = `
@@ -1391,7 +1406,7 @@
         }
 
         // ==========================================================================
-        // DINAMIKUS GENERÁLÓ MOTOR (HTML ELEMZŐ)
+        // DINAMIKUS GENERÁLÓ MOTOR (BIZTONSÁGOS API HÍVÁSSAL)
         // ==========================================================================
         async function openGenerator(itemIndex) {
             if (!sessionToken || !currentUser) {
@@ -1416,7 +1431,7 @@
             receiptModal.classList.add('hidden-modal');
 
             const item = currentCategoryData[itemIndex];
-            document.getElementById('generatorBrandName').textContent = item.name;
+            const cleanTemplateName = item.file.replace('.html', '');
             
             const dynamicInputsDiv = document.getElementById('dynamicInputs');
             const hiddenInputsBox = document.getElementById('hiddenInputsBox');
@@ -1425,20 +1440,29 @@
             
             let foundVariables = [];
             
+            // BIZTONSÁGOS API HÍVÁS (NINCS HTML LETÖLTÉS!)
             try {
-                const response = await fetch(`templates/${item.file}`);
-                if (!response.ok) throw new Error(`HTML File not found! HTTP ${response.status}`);
-                const htmlContent = await response.text();
+                document.getElementById('generatorBrandName').innerHTML = `<svg class="w-6 h-6 animate-spin inline-block mr-2 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span class="text-white">Secure Connection...</span>`;
                 
-                const regex = /\{([a-zA-Z0-9_]+)\}/g; 
-                let match;
-                const varsSet = new Set();
-                while ((match = regex.exec(htmlContent)) !== null) {
-                    varsSet.add(match[1]); 
-                }
-                foundVariables = [...varsSet];
+                const response = await fetch(`${API_BASE_URL}/get_fields`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: sessionToken,
+                        template: cleanTemplateName
+                    })
+                });
+                
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                const data = await response.json();
+                
+                if(data.error) throw new Error(data.error);
+                
+                document.getElementById('generatorBrandName').textContent = item.name;
+                foundVariables = data.fields;
+                
             } catch (err) {
-                showCustomAlert("Template Error", "Critical failure while analyzing the physical HTML structure. " + err.message, "Close", closeGenerator, true);
+                showCustomAlert("Secure Fetch Error", "Could not securely fetch required fields from the Core Engine. " + err.message, "Close", closeGenerator, true);
                 return;
             }
 
